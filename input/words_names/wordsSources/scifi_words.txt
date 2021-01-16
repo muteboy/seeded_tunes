@@ -1,0 +1,6 @@
+starship
+drone
+droid
+android
+kuiper
+oort

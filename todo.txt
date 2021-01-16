@@ -1,0 +1,6 @@
+@graphics do 12inch layout
+@graphics do CD booklet layout
+@graphics do CD inlay layout
+@familytree confirm
+make catno sequential across whole label
+@familytree generate statements about who joined, from where etc

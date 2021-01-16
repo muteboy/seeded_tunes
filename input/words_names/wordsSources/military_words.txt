@@ -1,0 +1,15 @@
+carbine
+attack
+grenade
+amphibious
+assault
+death
+fire
+ship
+pistol
+grip
+freighter
+rifle
+revolver
+rapier
+broadsword

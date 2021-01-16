@@ -1,0 +1,22 @@
+better
+worse
+fewer
+more
+louder
+faster
+harder
+softer
+simpler
+cleaner
+dirtier
+smoother
+rougher
+slower
+more complex
+bigger
+smaller
+cleverer
+stupider
+nicer
+tighter
+looser
