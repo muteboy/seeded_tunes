@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-###############################################################################################################
-# IMPORT MODULES
-###############################################################################################################
 
 import os
 import shutil
 import webbrowser
+from collections import defaultdict
 from datetime import datetime
 from random import choice, randint, random, sample, seed, uniform
+import pdfkit
 
 import dominate
 from dominate.tags import (
@@ -19,8 +18,9 @@ from dominate.tags import (
     h4,
     h5,
     h6,
-    p,
     link,
+    p,
+    span,
     style,
     table,
     tbody,
@@ -28,7 +28,6 @@ from dominate.tags import (
     th,
     thead,
     tr,
-    span,
 )
 from graphviz import Digraph, nohtml
 from tqdm import tqdm
@@ -67,13 +66,12 @@ class scene(object):
         self.numIncarnations = numIncarnations
         self.people = self.scenePeople(randint(40, 100))
         self.pathName = f"Scene_{self.seed}"
-        self.path = "..\\output\\" + self.pathName.replace(" ", "_")
+        self.path = "..\\seeded_tunes_output\\" + self.pathName.replace(" ", "_")
         if os.path.exists(self.path):
             shutil.rmtree(self.path, ignore_errors=True)
         os.mkdir(self.path)
         # shutil.rmtree(self.path, ignore_errors=True)
         self.initGraph()
-        self.initHTML()
         for num in tqdm(
             range(1, self.numLabels + 1), desc="02 Labels".ljust(18), position=2
         ):
@@ -82,10 +80,11 @@ class scene(object):
         self.yearFirst = min(a.yearFirst for a in self.labels)
         self.yearLast = max(a.yearLast for a in self.labels)
         self.people = list(set(self.labelPeople))
-        if (self.yearFirst == self.yearLast):
-            self.name = f"The \"{self.seed}\" Music Scene of {self.yearFirst} CE"
+        if self.yearFirst == self.yearLast:
+            self.name = f'The "{self.seed}" Music Scene of {self.yearFirst} CE'
         else:
-            self.name = f"The \"{self.seed}\" Music Scene of {self.yearFirst} to {self.yearLast} CE"
+            self.name = f'The "{self.seed}" Music Scene of {self.yearFirst} to {self.yearLast} CE'
+        self.initHTML()
         self.logScene()
         self.graphScene()
         self.graphPeopleLinks()
@@ -139,39 +138,38 @@ class scene(object):
         self.gvGraph.edge_attr.update(arrowhead="none", fontname=gvFont, fontsize="6")
 
     def initHTML(self):
-        self.doc = dominate.document(title="Example HTML")
-        self.docPath = f"{self.path}\\Scene_{self.seed}_Log.html"
-        # self.docPath = "index.html"
-        # f="..\output\Scene_1\..\..\Seeded_Tunes\input\log_styles.css"
-        # cssPath = f"{self.path}\\..\\..\\Seeded_Tunes\\input\\log_styles.css"
-        # TODO fix styles path
+        self.doc = dominate.document(title=f"Scene Log for {self.name}")
+        self.docFileBase = f"Scene_{self.seed}_Log"
+        self.docPathHtml = f"{self.path}\\{self.docFileBase}.html"
+        self.docPathPdf =  f"{self.path}\\{self.docFileBase}.pdf"
         with self.doc.head:
-            # link(rel='stylesheet', href=cssPath)
             style(
                 """
                 body { font-family: Arial Nova Condensed, FreeSans, sans-serif; margin: 3em 1em; }
                 p { font-size: 1em; }
+                div#label { margin-left: 2%;}
+                div#artist { margin-left: 4%; }
+                div#incarn { margin-left: 6%; }
+                div#album { margin-left: 8%; }
                 h1 { font-size: 3em; font-weight: bold; }
                 h2 { font-size: 2.6em; font-weight: bold; }
                 h3 { font-size: 2.2em; font-weight: bold; }
                 h4 { font-size: 1.8em; font-weight: bold; }
                 h5 { font-size: 1.4em; font-weight: bold; }
-                h6 { font-size: 1em; font-weight: bold; }
-                th { border-bottom: 1px solid black; border-collapse: collapse;}
+                h6 { font-size: 1em;   font-weight: bold; }
+                table { border-collapse: collapse; }
+                th { border-bottom: 1px solid black; }
             """
             )
 
     def graphPeopleLinks(self):
         for p in self.people:
             for _ in p.incarnList:
-                # print(i.name)
                 return
                 # return
-                # out += f'{(numTabs+1) * chr(9)}Incarnation: {i.incarnID} {i.name}\n'
 
     def logScene(self):
         strWidth = 18
-        # self.doc += h1(self.name)
         d = self.doc
         d += h1(self.name)
         for label in tqdm(
@@ -191,18 +189,18 @@ class scene(object):
                 ):
                     d += incarn.html()
                     # loop through albums
+                    # TODO include artwork in log
+                    # TODO include catalogue numbers 
                     for album in tqdm(
                         incarn.albums, desc="15 Log Albums".ljust(strWidth), position=15
                     ):
                         d += album.html()
-
-        # for person in tqdm(self.people, desc="Log People".ljust(strWidth), position=17):
-        # lf.write(str(person) + "\n")
-        # lf.close()
-
-        with open(self.docPath, "w") as file:
+        with open(self.docPathHtml, "w", encoding="utf8") as file:
             file.write(self.doc.render())
-        os.startfile(self.docPath)
+        os.startfile(self.docPathHtml)
+        pdfkit.from_file(self.docPathHtml,self.docPathPdf) 
+        os.startfile(self.docPathPdf)
+
 
     def graphScene(self):
         """ Scene GraphViz, including artists and albums """
@@ -216,28 +214,35 @@ class scene(object):
         # self.gvGraph.subgraph(graph_attr['rank']='same')
         self.albums = []
         self.years = []
-        for l in self.labels:  # assemble list of release years across all labels.
+        self.incarnsAll = []
+        for (
+            l
+        ) in (
+            self.labels
+        ):  # assemble list of release years across all labels. AND list of incarnations
             for ar in l.artists:
+                self.incarnsAll += ar.incarnations
                 for incarn in ar.incarnations:
                     self.albums += incarn.albums
                     for al in incarn.albums:
                         self.years.append(al.year)
         self.years = list(dict.fromkeys(self.years))
-        # TODO for each year, find all the incarnations with yearfirst the same
-        # with self.gvGraph.subgraph(name='hello') as gvs:
-        # self.gvGraph.subgraph(name='hello').attr(kw='graph',rank='same')
-        # for y in self.years:
-        #     yearIncarns=[]
-        #     for l in self.labels:
-        #         for ar in l.artists:
-        #             for inc in ar.incarnations:
-        #                 if inc.yearFirst == y:
-        #                     yearIncarns.append(inc.name)
-        #     with self.gvGraph.subgraph(name=y) as gvs:
-        #         gvs.graph_attr['rank']='same'
-        #         for yi in yearIncarns:
-        #             gvs.node(name=yi)
-        # print(dir(self.people))
+        yearGroups = defaultdict(list)
+        for obj in self.incarnsAll:
+            yearGroups[obj.yearFirst].append(obj)
+        # new_list = groups.values()
+        self.incarnsAllGroupedByYear = sorted(
+            yearGroups.values(), key=lambda i: i[0].yearFirst
+        )
+        # TODO rank same incarns by year in subgraphs.
+        # for yearGroup in self.incarnsAllGroupedByYear:
+        #     sg = Digraph(name=yearGroup[0].yearFirst)
+        #     sg.attr(kw="graph", rank="same")
+        #     for incarn in yearGroup:
+        #         incarn.graphIncarnation(sg)
+        #     self.gvGraph.subgraph(sg)
+
+        # link people who joined new group
         for p in self.people:
             p.incarnList = sorted(p.incarnList, key=lambda i: i.yearFirst)
             for i, j in zip(p.incarnList, p.incarnList[1:]):

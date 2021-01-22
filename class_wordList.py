@@ -40,6 +40,9 @@ class wordList(object):
         ]
         return choice(outputs)
 
+    # def makeNameSafePath(self, nameIn):
+    #     """ replace characters to make name safe for a path """
+
     def wordsWithPreposition2(
         self, prepositionsListFile="input\\words_names\\wordsSources\\prepositions.txt"
     ):

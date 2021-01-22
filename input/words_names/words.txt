@@ -129,7 +129,6 @@ commons
 communicant
 compass
 compeer
-con
 condition
 conjure
 contemn
@@ -551,6 +550,10 @@ behaviour
 behaviourism
 behaviourism
 behaviouristic
+behavior
+behaviorism
+behaviorism
+behavioristic
 beneficence
 betweenbrain
 brain

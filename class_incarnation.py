@@ -42,6 +42,7 @@ class incarnation(object):
         self.yearLast = yearLast
         self.incarnID = f"{self.artist.artistID}.I{self.number}"
         # make sure people in different incarns are different. Loop through until peoples are different.
+        # TODO make sure there is at least one person overlap - use set intersections
         while True:
             self.people = sample(
                 self.artist.people, randint(2, min(len(self.artist.people), 6))
@@ -77,7 +78,9 @@ class incarnation(object):
         self.yearLast = max(self.years)
         for p in self.people:
             p.incarnList.append(self)
-        self.graphIncarnation()
+        self.graphIncarnation(
+            self.artist.label.scene.gvGraph
+        )  # now done in Scene to allow year grouping
 
     def __str__(self, numTabs=3):
         return f'{numTabs * chr(9)}Incarnation: {self.artist.name} #{self.number} ({", ".join([p.fullname for p in self.people])})\n {numTabs * chr(9)} Incarnation active: {self.yearFirst} to {self.yearLast}\n {numTabs * chr(9)} # of Albums: {self.numAlbums}'
@@ -94,39 +97,40 @@ class incarnation(object):
             history = f"Released {len(self.albums)} albums on {self.artist.label.name}, from {self.yearFirst} to {self.yearLast}. "
         return history
 
-    def graphIncarnation(self):
+    def graphIncarnation(self, graph):
+        # g = self.artist.label.scene.gvGraph
         g = self.artist.label.scene.gvGraph
-        # artistBiog = self.artist.biography().replace("'", " <I>", 1).replace("'","</I>  ",2).replace("'"," <I>  ",3).replace("'","</I>  ",4) if self.number == 1 else ""
         artistBiog = self.artist.biographyGen if self.number == 1 else ""
         numIncarnPeople = len(self.people)
         numIP2 = numIncarnPeople * 2
-        incarnLabel = f'<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="4">'
+        incarnNodeText = f'<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="4">'
         # incarnLabel += f'<TR><TD COLSPAN="{numIncarnPeople*2}" BORDER="0" SIDES="B"><B><FONT POINT-SIZE="12">{incarnName}</FONT></B></TD></TR>'
-        incarnLabel += f'<TR><TD COLSPAN="{numIncarnPeople}" BORDER="0"><B><FONT POINT-SIZE="12">{self.name}</FONT></B></TD>'
-        incarnLabel += f'<TD COLSPAN="{numIncarnPeople}"><FONT POINT-SIZE="6">{"<BR/>".join(textwrap.wrap(artistBiog + self.incarnHistory(),width=30))}</FONT></TD></TR>'
-        incarnLabel += "<TR>"
+        incarnNodeText += f'<TR><TD COLSPAN="{numIncarnPeople}" BORDER="0"><B><FONT POINT-SIZE="12">{self.yearFirst} - {self.name}</FONT></B></TD>'
+        incarnNodeText += f'<TD COLSPAN="{numIncarnPeople}"><FONT POINT-SIZE="6">{"<BR/>".join(textwrap.wrap(artistBiog + self.incarnHistory(), width=30))}</FONT></TD></TR>'
+        incarnNodeText += "<TR>"
         cellNone = 'BORDER="0"'
         cellTL = 'BORDER="1" SIDES="TL"'
-        # cellTR = 'BORDER="1" SIDES="TR"'
         cellT = 'BORDER="1" SIDES="T"'
-        # cellR = 'BORDER="1" SIDES="R"'
         cellL = 'BORDER="1" SIDES="L"'
-        # cellB = 'BORDER="1" SIDES="B"'
         for p2 in range(1, numIP2 + 1):
-            incarnLabel += f'<TD CELLPADDING="1" {cellNone if p2 == 1 else cellL if p2 == numIP2 else cellTL if (p2 % 2 == 0) else cellT}></TD>'
-        incarnLabel += "</TR>"
-        incarnLabel += "<TR>"
+            incarnNodeText += f'<TD CELLPADDING="1" {cellNone if p2 == 1 else cellL if p2 == numIP2 else cellTL if (p2 % 2 == 0) else cellT}></TD>'
+        incarnNodeText += "</TR>"
+        incarnNodeText += "<TR>"
         for p in self.people:
-            incarnLabel += (
+            incarnNodeText += (
                 f'<TD COLSPAN="2"><FONT POINT-SIZE="7">{p.fullname}</FONT></TD>'
             )
-            # incarnLabel += f'<TD COLSPAN="2">{p.fullname}<BR/><FONT POINT-SIZE="9">{"bass/voc"}</FONT></TD>'
-        incarnLabel += "</TR></TABLE>>"
-        g.node(name=self.name, label=incarnLabel)
+        incarnNodeText += "</TR></TABLE>>"
+        # print(incarnNodeText)
+        g.node(name=self.name, label=incarnNodeText)
 
     def html(self):
-        _div = div(id=self.name)
-        _div += h4(self.name)
-        _div += p(f'Personnel: {", ".join([p.fullname for p in self.people])}.')
-        _div += p(self.incarnHistory())
+        # _div = div(id=self.name)
+        _div = div(id="incarn")
+        _div += h4(self.name, id="incarnName")
+        _div += p(
+            f'Personnel: {", ".join([p.fullname for p in self.people])}.',
+            id="incarnPersonnel",
+        )
+        _div += p(self.incarnHistory(), id="incarnHistory")
         return _div

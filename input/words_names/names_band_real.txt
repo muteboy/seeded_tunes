@@ -70,7 +70,7 @@ The Allman Brothers Band
 The Animals
 Adam Ant
 Anthrax
-The B-52's
+The B-52s
 Burt Bacharach
 Badfinger
 Bauhaus
@@ -167,7 +167,7 @@ Marianne Faithfull
 The Fall
 The Falling Leaves
 The Feelies
-The Flamin' Groovies
+The Flamin Groovies
 Foreigner
 The Four Seasons
 Peter Frampton
@@ -188,7 +188,6 @@ The Grass Roots
 Green Day
 The Guess Who
 Guided by Voices
-Guns N' Roses
 Bill Haley
 Hall and Oates
 Happy Mondays
@@ -301,7 +300,6 @@ NRBQ
 Gary Numan
 Laura Nyro
 Oasis
-Sinéad O'Connor
 The Offspring
 Ozzy Osbourne
 Robert Palmer
@@ -520,7 +518,6 @@ Country Joe and the Fish
 The Cramps
 David Crosby
 Danzig
-The dB's
 Deee-Lite
 Diamond Head
 The Dictators
@@ -586,7 +583,6 @@ Ted Nugent
 The Only Ones
 Operation Ivy
 Orange Juice
-Jim O'Rourke
 Palace
 Pantera
 Van Dyke Parks

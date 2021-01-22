@@ -58,7 +58,6 @@ commons
 communicant
 compass
 compeer
-con
 condition
 conjure
 contemn

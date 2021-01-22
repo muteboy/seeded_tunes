@@ -35,6 +35,10 @@ class album(object):
         self.albumID = f"{self.incarn.artist.artistID}.R{number}"
         self.catNo = f"{self.incarn.artist.label.initials}{self.seed}"
         # TODO LATER make catNo sequential across whole label, not within artist. Hard
+        # TODO CDs started in 1982. Any album before that only on 12 or cassette. Later reissued on CD?
+        # TODO for each album, make a list of FORMAT objects. Each has own serial number, artwork etc.
+        # TODO superclass album: title, year, base cat no, base artwork
+        # TODO subclass format: type: album, full cat no, full artwork, if < 1982, then CD only in 1982
         self.name = self.incarn.artist.label.scene.wordList.combineRandomLinesFromFile(
             numWords=randint(1, 3)
         )
@@ -105,11 +109,13 @@ class album(object):
             "hhc",
             "hho",
         ]
-        _div = div(id=self.name)
+        # _div = div(id=self.name)
+        _div = div(id="album")
         _div += h5(
-            span(self.name, style="font-style:italic;"), (", " + str(self.year)),
+            span(self.name, style="font-style:italic;"), (", " + str(self.year)),id="albumName"
         )
-        tbl = table(id=self.name, caption=self.name, style="font-size:80%")
+        # tbl = table(id=self.name, caption=self.name, style="font-size:80%")
+        tbl = table(id="albumTable", caption=self.name, style="font-size:80%")
         tbl += thead(tr(th(tableHead) for tableHead in albumTableHeaders), style="",)
         for tk in tqdm(self.tracks, desc="16 Log Tracks".ljust(18), position=16,):
             tbl += tk.html()

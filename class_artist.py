@@ -41,9 +41,28 @@ class artist(object):
         )
         self.yearLast = randint(self.yearFirst, self.label.scene.yearNow)
         self.incarnations = []
-        self.name = self.label.scene.wordList.combineRandomLinesFromFile(
-            numWords=randint(1, 2)
-        )
+
+        # while True:
+        #     self.people = sample(
+        #         self.artist.people, randint(2, min(len(self.artist.people), 6))
+        #     )
+        #     self.people.sort(key=lambda x: x.fullname)
+        #     if (self.artist.numIncarnations) == 1 or (self.number == 1):
+        #         break
+        #     else:
+        #         if self.people != self.artist.incarnations[self.number - 2].people:
+        #             break
+
+
+        while True:
+            self.name = self.label.scene.wordList.combineRandomLinesFromFile(
+                numWords=randint(1, 2)
+            )
+            if self.name != self.label.name:
+                break
+
+
+
         self.name = ("The " + self.name) if random() < 0.2 else self.name
         self.path = "\\".join([self.label.path, self.name.replace(" ", "_")])
         os.mkdir(self.path)
@@ -114,14 +133,16 @@ class artist(object):
                     )
 
     def html(self):
-        _div = div(id=self.name)
-        _div += h3(f"Artist: {self.name}")
+        # _div = div(id=self.name)
+        _div = div(id="artist")
+        _div += h3(f"Artist: {self.name}",id="artistName")
         _p = f'{self.biographyGen} '
         if self.yearFirst == self.yearLast:
             _p += f'Active in {self.yearFirst}. '
         else:
-            _p += f'Active from {self.yearFirst} to {self.yearLast}.'
+            _p += f'Active from {self.yearFirst} to {self.yearLast}. '
         self.numAlbums = sum(map(lambda i: len(i.albums) , self.incarnations))
         _p += f'Released {self.numAlbums} album{"" if self.numAlbums == 1 else "s"}{" over " + str(self.numIncarnations) + " incarnations." if self.numIncarnations > 1 else "."}'
-        _div += _p
+        _div += p(_p, id="artistBiog")
         return _div
+
