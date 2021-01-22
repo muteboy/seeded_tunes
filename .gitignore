@@ -1,3 +1,4 @@
 .vscode/launch.json
 .vscode/*
 todo.txt
+__pycache__/*
