@@ -199,8 +199,7 @@ class scene(object):
             file.write(self.doc.render())
         os.startfile(self.docPathHtml)
         pdfkit.from_file(self.docPathHtml,self.docPathPdf) 
-        os.startfile(self.docPathPdf)
-
+        # os.startfile(self.docPathPdf)
 
     def graphScene(self):
         """ Scene GraphViz, including artists and albums """
@@ -213,7 +212,6 @@ class scene(object):
         )
         # self.gvGraph.subgraph(graph_attr['rank']='same')
         self.albums = []
-        self.years = []
         self.incarnsAll = []
         for (
             l

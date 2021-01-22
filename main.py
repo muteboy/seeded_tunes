@@ -8,8 +8,8 @@ from class_scene import scene
 from class_track import track
 
 defaultSeed=100672
-inputSeed = int(input(f"Enter seed number, or hit Enter for default ({defaultSeed}): ") or defaultSeed)
-
+# inputSeed = int(input(f"Enter seed number, or hit Enter for default ({defaultSeed}): ") or defaultSeed)
+inputSeed = defaultSeed
 
 sceneCurrent = scene(
     seedInt=inputSeed,
