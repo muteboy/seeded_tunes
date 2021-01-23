@@ -37,7 +37,7 @@ class label(object):
         self.yearLast = randint(self.yearFirst, self.scene.yearNow)
         self.years = []
         self.numArtists = (
-            randint(1, 6) if self.scene.numArtists == 0 else self.scene.numArtists
+            randint(1, 6) if self.scene.numArtists == 0 else randint(1, self.scene.numArtists)
         )
         self.seed = int(str(scene.seed) + format(self.number, "02d"))
         seed(self.seed)
@@ -58,6 +58,8 @@ class label(object):
             range(1, self.numArtists + 1), desc="03 Artists".ljust(18), position=3
         ):
             self.artists.append(artist(self, num))
+        # get first and last years for the label
+        # get people used for the label
         for a in self.artists:
             self.artistPeople.extend(a.people)
             for y in [a.yearFirst, a.yearLast]:
@@ -71,7 +73,7 @@ class label(object):
         self.yearFirst = min(self.years)
         self.yearLast = max(self.years)
         for idx, alb in enumerate(self.albumCatalog):
-            alb.catNo = f"{self.initials}{self.seed}A{format(idx+1, '03d')}"
+            alb.catNo = f"{self.initials}{self.seed}-{format(idx+1, '03d')} XXXXXXXX"
         # self.graph()
 
     def comment(self):

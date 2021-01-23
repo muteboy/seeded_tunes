@@ -70,3 +70,12 @@ erDiagram
     }
 
 ```
+
+| Entity      |     |     |
+| ----------- | --- | --- |
+| Scene       |     |     |
+| Label       |     |     |
+| Artist      |     |     |
+| Incarnation |     |     |
+| Album       |     |     |
+| Format      |     |     |

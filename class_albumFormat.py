@@ -30,9 +30,9 @@ from dominate.tags import (
 # -*- coding: utf-8 -*-
 from random import choice, randint, random, sample, seed, uniform
 from class_albumArtwork import albumArtwork
-from class_album import album
+# from class_album import album
 
-class albumFormat(album):
+class albumFormat(object):
     def __init__(self, album, formatType):
         self.album = album
         self.formatType = formatType

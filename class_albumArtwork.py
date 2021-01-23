@@ -6,6 +6,7 @@ from random import choice, randint, random, sample, seed, uniform
 
 # import dominate
 import svgwrite
+
 # from dominate.tags import (
 #     caption,
 #     div,
@@ -27,17 +28,73 @@ from tqdm import tqdm
 
 class albumArtwork(object):
     def __init__(self, album, formatType):
-        self.album = album
         hue = random()
+        self.album = album
         self.artColorOutline = self.albumArtBG(hue, 0.4, 0.2)
         self.artColorBG = self.albumArtBG(hue, 0.3, 0.2)
         self.artColorText = "white"
         self.artDim = 210
         self.makeSvgSymbols()
+        # self.svgSymbols.defs.add(symbolLogo)
         self.artwork12in()
         # self.artworkCassette() # TODO make cassettes work
         # self.artworkCdBooklet() # TODO make CD booklet work
         # self.artworkCdTray() # TODO make cd tray work
+
+    def makeSvgLogo(self):
+        symbolLogo = self.svgSymbols.g(id="logo")
+        svgPattern45Stripe = self.svgSymbols.pattern(
+            size=(1, 1), patternUnits="userSpaceOnUse"
+        )
+        self.svgSymbols.defs.add(svgPattern45Stripe)
+        svgPattern45Stripe.add(
+            self.svgSymbols.line(
+                start=(0, 1), end=(1, 0), stroke_width=0.1, stroke="white"
+            )
+        )
+        logoDim = 10
+
+        symbolLogo.add(
+            self.svgSymbols.rect(
+                size=(logoDim, logoDim),
+                fill="none",
+                stroke_width=f"{logoDim / 36}",
+                stroke="white",
+            )
+        )
+        symbolLogo.add(
+            self.svgSymbols.rect(
+                insert=(0, ((logoDim / 3) * 2)),
+                size=(logoDim, (logoDim / 3)),
+                fill=svgPattern45Stripe.get_paint_server(),
+                stroke_width="0.2",
+                stroke="white",
+            )
+        )
+        symbolLogo.add(
+            self.svgSymbols.path(
+                d=f"M {logoDim / 2} {logoDim / 3} L {logoDim / 2} {(logoDim / 6) * 5}",
+                stroke_width="0.2",
+                stroke="white",
+            )
+        )
+        symbolLogo.add(
+            self.svgSymbols.circle(
+                center=((logoDim / 2), ((logoDim / 6) * 5)),
+                r=(logoDim / 20),
+                fill="white",
+            )
+        )
+        symbolLogo.add(
+            self.svgSymbols.path(
+                d=f"M {logoDim / 2} {logoDim / 3} a 1 1 0 0 1 {logoDim /3} 0 z a 1 1 0 0 0 {-(logoDim /3)} 0 z ",
+                stroke_width="0.2",
+                stroke="white",
+                fill="none",
+            )
+        )
+        self.svgSymbols.defs.add(symbolLogo)
+        # return symbolLogo
 
     def makeSvgSymbols(self):
         self.albumArtworkSymbolLibraryPath = (
@@ -188,61 +245,6 @@ class albumArtwork(object):
         # self.sym.defs.add(
         #     self.sym.path(d=f"M 0 0 L {self.artDim} 0 {self.artDim} {self.artDim} Z")
         # )
-        # endregion
-
-        # region "define symbol logo"
-        symbolLogo = self.svgSymbols.g(id="logo")
-        svgPattern45Stripe = self.svgSymbols.pattern(
-            size=(1, 1), patternUnits="userSpaceOnUse"
-        )
-        self.svgSymbols.defs.add(svgPattern45Stripe)
-        svgPattern45Stripe.add(
-            self.svgSymbols.line(
-                start=(0, 1), end=(1, 0), stroke_width=0.1, stroke="white"
-            )
-        )
-        logoDim = 10
-
-        symbolLogo.add(
-            self.svgSymbols.rect(
-                size=(logoDim, logoDim),
-                fill="none",
-                stroke_width=f"{logoDim / 36}",
-                stroke="white",
-            )
-        )
-        symbolLogo.add(
-            self.svgSymbols.rect(
-                insert=(0, ((logoDim / 3) * 2)),
-                size=(logoDim, (logoDim / 3)),
-                fill=svgPattern45Stripe.get_paint_server(),
-                stroke_width="0.2",
-                stroke="white",
-            )
-        )
-        symbolLogo.add(
-            self.svgSymbols.path(
-                d=f"M {logoDim / 2} {logoDim / 3} L {logoDim / 2} {(logoDim / 6) * 5}",
-                stroke_width="0.2",
-                stroke="white",
-            )
-        )
-        symbolLogo.add(
-            self.svgSymbols.circle(
-                center=((logoDim / 2), ((logoDim / 6) * 5)),
-                r=(logoDim / 20),
-                fill="white",
-            )
-        )
-        symbolLogo.add(
-            self.svgSymbols.path(
-                d=f"M {logoDim / 2} {logoDim / 3} a 1 1 0 0 1 {logoDim /3} 0 z a 1 1 0 0 0 {-(logoDim /3)} 0 z ",
-                stroke_width="0.2",
-                stroke="white",
-                fill="none",
-            )
-        )
-        self.svgSymbols.defs.add(symbolLogo)
         # endregion
 
         # region symbol circle

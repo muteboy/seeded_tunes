@@ -11,18 +11,20 @@ defaultSeed=100672
 # inputSeed = int(input(f"Enter seed number, or hit Enter for default ({defaultSeed}): ") or defaultSeed)
 inputSeed = defaultSeed
 
+print("\n" * 20)
+
 sceneCurrent = scene(
     seedInt=inputSeed,
     # seedInt=sys.argv[1],
     numLabels=2,
     yearStart=1972,
-    viewGv=True,
+    viewGv=False,
     numArtists=3,
     numIncarnations=2,
     numAlbums=2,
     numTracks=2,
+    viewLog=False,
 )
-# TODO make num incarns, albums, tracks all MAX these options, random in the range
 
 print("\n" * 20)
 

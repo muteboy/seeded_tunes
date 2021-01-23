@@ -50,16 +50,18 @@ class scene(object):
         numIncarnations,
         numAlbums,
         numTracks,
+        viewLog,
     ):
         self.seed = seedInt
         seed(self.seed)
         self.yearNow = datetime.today().year
+        self.viewLog = viewLog
         self.years = []
         self.labels = []
         self.yearStart = yearStart
         self.labelPeople = []  # people collected from the labels
         self.wordList = wordList()
-        self.numLabels = randint(1, 6) if numLabels == 0 else numLabels
+        self.numLabels = randint(1, 6) if numLabels == 0 else randint(1, numLabels)
         self.numArtists = numArtists
         self.numAlbums = numAlbums
         self.numTracks = numTracks
@@ -72,18 +74,21 @@ class scene(object):
         os.mkdir(self.path)
         # shutil.rmtree(self.path, ignore_errors=True)
         self.initGraph()
+        # add labels
         for num in tqdm(
             range(1, self.numLabels + 1), desc="02 Labels".ljust(18), position=2
         ):
             self.labels.append(label(self, num))
             self.labelPeople += self.labels[num - 1].people
+        # find first and last years
         self.yearFirst = min(a.yearFirst for a in self.labels)
         self.yearLast = max(a.yearLast for a in self.labels)
         self.people = list(set(self.labelPeople))
+        self.name = f'The "{self.seed}" Music Scene of {self.yearFirst}'
         if self.yearFirst == self.yearLast:
-            self.name = f'The "{self.seed}" Music Scene of {self.yearFirst} CE'
+            self.name += ' CE'
         else:
-            self.name = f'The "{self.seed}" Music Scene of {self.yearFirst} to {self.yearLast} CE'
+            self.name += f' to {self.yearLast} CE'
         self.initHTML()
         self.logScene()
         self.graphScene()
@@ -141,7 +146,7 @@ class scene(object):
         self.doc = dominate.document(title=f"Scene Log for {self.name}")
         self.docFileBase = f"Scene_{self.seed}_Log"
         self.docPathHtml = f"{self.path}\\{self.docFileBase}.html"
-        self.docPathPdf =  f"{self.path}\\{self.docFileBase}.pdf"
+        self.docPathPdf = f"{self.path}\\{self.docFileBase}.pdf"
         with self.doc.head:
             style(
                 """
@@ -191,16 +196,18 @@ class scene(object):
                     d += incarn.html()
                     # loop through albums
                     # TODO include artwork in log
-                    # TODO include catalogue numbers 
                     for album in tqdm(
                         incarn.albums, desc="15 Log Albums".ljust(strWidth), position=15
                     ):
                         d += album.html()
         with open(self.docPathHtml, "w", encoding="utf8") as file:
             file.write(self.doc.render())
-        os.startfile(self.docPathHtml)
-        pdfkit.from_file(self.docPathHtml,self.docPathPdf) 
-        # os.startfile(self.docPathPdf)
+        pdfkit.from_file(self.docPathHtml, self.docPathPdf)
+        if self.viewLog:
+            os.startfile(self.docPathHtml)
+            os.startfile(self.docPathPdf)
+        else:
+            pass
 
     def graphScene(self):
         """ Scene GraphViz, including artists and albums """

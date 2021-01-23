@@ -60,7 +60,7 @@ class incarnation(object):
         self.numAlbums = (
             randint(1, 3)
             if self.artist.label.scene.numAlbums == 0
-            else self.artist.label.scene.numAlbums
+            else randint(1, self.artist.label.scene.numAlbums)
         )
         for num in tqdm(
             range(1, self.numAlbums + 1), desc="05 Albums".ljust(18), position=5

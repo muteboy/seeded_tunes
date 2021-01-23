@@ -53,7 +53,7 @@ class artist(object):
         #         if self.people != self.artist.incarnations[self.number - 2].people:
         #             break
 
-
+        # ensure artist name is not the same as the label
         while True:
             self.name = self.label.scene.wordList.combineRandomLinesFromFile(
                 numWords=randint(1, 2)
@@ -61,15 +61,14 @@ class artist(object):
             if self.name != self.label.name:
                 break
 
-
-
+        # sometimes add "The" to name
         self.name = ("The " + self.name) if random() < 0.2 else self.name
         self.path = "\\".join([self.label.path, self.name.replace(" ", "_")])
         os.mkdir(self.path)
         self.numIncarnations = (
             randint(1, 4)
             if self.label.scene.numIncarnations == 0
-            else self.label.scene.numIncarnations
+            else randint(1, self.label.scene.numIncarnations)
         )
         self.biographyGen = self.biography()
         yearPeriod = round((self.yearLast - self.yearFirst) / self.numIncarnations)

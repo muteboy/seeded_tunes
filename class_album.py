@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from random import choice, randint, random, sample, seed, uniform
 import datetime
 import os
 import textwrap
-from tqdm import tqdm
-from class_albumArtwork import albumArtwork
-from class_track import track
-from class_albumFormat import albumFormat
+from random import choice, randint, random, sample, seed, uniform
+
 import dominate
 from dominate.tags import (
     caption,
@@ -15,18 +12,23 @@ from dominate.tags import (
     h2,
     h3,
     h4,
-    p,
-    h6,
     h5,
+    h6,
+    p,
+    span,
     style,
     table,
-    span,
     tbody,
     td,
     th,
     thead,
     tr,
 )
+from tqdm import tqdm
+
+from class_albumArtwork import albumArtwork
+from class_albumFormat import albumFormat
+from class_track import track
 
 
 class album(object):
@@ -52,14 +54,14 @@ class album(object):
         if self.incarn.artist.label.scene.numTracks == 0:
             self.numTracks = randint(1, 10)
         else:
-            self.numTracks = self.incarn.artist.label.scene.numTracks
+            self.numTracks = randint(1, self.incarn.artist.label.scene.numTracks)
         if self.numTracks < 5:
             self.name += " EP"
         self.svgTagline = "ELECTRONIC MUSIC GENERATED AND RECORDED DIGITALLY BY SEED"
+        nbsp = "\N{NO-BREAK SPACE}"
         self.surnameCredits = "\N{NO-BREAK SPACE}/\N{NO-BREAK SPACE}".join(
             [p.surname for p in self.people]
         )
-        nbsp = "\N{NO-BREAK SPACE}"
         self.trackNamesText = "     ".join(
             [
                 f'{i+1}.\N{NO-BREAK SPACE}{t.name.replace(" ",nbsp)}'
@@ -115,7 +117,9 @@ class album(object):
         # _div = div(id=self.name)
         _div = div(id="album")
         _div += h5(
-            span(self.name, style="font-style:italic;"), (", " + str(self.year)),id="albumName"
+            span(self.name, style="font-style:italic;"),
+            (", " + str(self.year)),
+            id="albumName",
         )
         # tbl = table(id=self.name, caption=self.name, style="font-size:80%")
         tbl = table(id="albumTrackTable", caption=self.name, style="font-size:80%")
@@ -123,13 +127,12 @@ class album(object):
         for tk in tqdm(self.tracks, desc="16 Log Tracks".ljust(18), position=16,):
             tbl += tk.html()
         ftbl = table(id="albumFormatTable", caption=self.name, style="font-size:100%")
-        ftbl += thead(tr(th(tableHead) for tableHead in ["Format", "Cat No", "Year of Release"]), style="",)
+        ftbl += thead(
+            tr(th(tableHead) for tableHead in ["Format", "Cat No", "Year of Release"]),
+            style="",
+        )
         for f in self.formats:
-            ftbl += tr(
-                td(f.formatNames[f.formatType]),
-                td(f.catNo),
-                td(f.year)
-                )
+            ftbl += tr(td(f.formatNames[f.formatType]), td(f.catNo), td(f.year))
         _div += ftbl
         _div += p()
         _div += tbl
