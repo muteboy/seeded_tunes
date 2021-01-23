@@ -71,7 +71,7 @@ class label(object):
         self.yearFirst = min(self.years)
         self.yearLast = max(self.years)
         for idx, alb in enumerate(self.albumCatalog):
-            alb.catNo = f"{self.initials}{self.seed}A{format(idx+1, '02d')}"
+            alb.catNo = f"{self.initials}{self.seed}A{format(idx+1, '03d')}"
         # self.graph()
 
     def comment(self):

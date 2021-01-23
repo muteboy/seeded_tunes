@@ -4,14 +4,29 @@ import math
 import textwrap
 from random import choice, randint, random, sample, seed, uniform
 
+# import dominate
 import svgwrite
+# from dominate.tags import (
+#     caption,
+#     div,
+#     h1,
+#     h2,
+#     h3,
+#     h4,
+#     h5,
+#     style,
+#     table,
+#     tbody,
+#     td,
+#     th,
+#     thead,
+#     tr,
+# )
 from tqdm import tqdm
-import dominate
-from dominate.tags import (caption, div, h1, h2, h3, h4, h5, style, table, tbody, td,
-                           th, thead, tr)
+
 
 class albumArtwork(object):
-    def __init__(self, album):
+    def __init__(self, album, formatType):
         self.album = album
         hue = random()
         self.artColorOutline = self.albumArtBG(hue, 0.4, 0.2)
@@ -1094,17 +1109,11 @@ class albumArtwork(object):
         # region add logos
         # add logo symbol front
         svg12in.add(
-            svg12in.use(
-                href=("#logo"),
-                transform="translate(590 290) scale(2)",
-            )
+            svg12in.use(href=("#logo"), transform="translate(590 290) scale(2)",)
         )
         # add logo symbol back
         svg12in.add(
-            svg12in.use(
-                href=("#logo"),
-                transform="translate(20 270) scale(2)",
-            )
+            svg12in.use(href=("#logo"), transform="translate(20 270) scale(2)",)
         )
         # endregion
 

@@ -6,6 +6,7 @@ import textwrap
 from tqdm import tqdm
 from class_albumArtwork import albumArtwork
 from class_track import track
+from class_albumFormat import albumFormat
 import dominate
 from dominate.tags import (
     caption,
@@ -14,6 +15,8 @@ from dominate.tags import (
     h2,
     h3,
     h4,
+    p,
+    h6,
     h5,
     style,
     table,
@@ -33,12 +36,10 @@ class album(object):
         self.seed = int(str(self.incarn.seed) + format(number, "02d"))
         self.number = number
         self.albumID = f"{self.incarn.artist.artistID}.R{number}"
+        self.formatTypes = ["CD", "MC", "12"]
+        self.formats = []
         self.catNo = f"{self.incarn.artist.label.initials}{self.seed}"
         # TODO LATER make catNo sequential across whole label, not within artist. Hard
-        # TODO CDs started in 1982. Any album before that only on 12 or cassette. Later reissued on CD?
-        # TODO for each album, make a list of FORMAT objects. Each has own serial number, artwork etc.
-        # TODO superclass album: title, year, base cat no, base artwork
-        # TODO subclass format: type: album, full cat no, full artwork, if < 1982, then CD only in 1982
         self.name = self.incarn.artist.label.scene.wordList.combineRandomLinesFromFile(
             numWords=randint(1, 3)
         )
@@ -78,7 +79,9 @@ class album(object):
         ):
             self.tracks.append(track(self, num))
         # self.textCopyright = f'All titles written by {self.surnameCredits}. \N{COPYRIGHT SIGN} {self.year} {self.artist.label.name}'
-        self.albumArtwork = albumArtwork(self)
+        for formatType in self.formatTypes:
+            self.formats.append(albumFormat(self, formatType))
+        # self.albumArtwork = albumArtwork(self)
 
     def __str__(self, numTabs=4):
         return f'{numTabs * chr(9)}Album {self.seed}: "{self.name}", {self.year}\n{numTabs * chr(9)} Personnel: {", ".join([p.fullname for p in self.people])}\n{numTabs * chr(9)}# of Tracks: {self.numTracks}'
@@ -115,10 +118,19 @@ class album(object):
             span(self.name, style="font-style:italic;"), (", " + str(self.year)),id="albumName"
         )
         # tbl = table(id=self.name, caption=self.name, style="font-size:80%")
-        tbl = table(id="albumTable", caption=self.name, style="font-size:80%")
+        tbl = table(id="albumTrackTable", caption=self.name, style="font-size:80%")
         tbl += thead(tr(th(tableHead) for tableHead in albumTableHeaders), style="",)
         for tk in tqdm(self.tracks, desc="16 Log Tracks".ljust(18), position=16,):
             tbl += tk.html()
+        ftbl = table(id="albumFormatTable", caption=self.name, style="font-size:100%")
+        ftbl += thead(tr(th(tableHead) for tableHead in ["Format", "Cat No", "Year of Release"]), style="",)
+        for f in self.formats:
+            ftbl += tr(
+                td(f.formatNames[f.formatType]),
+                td(f.catNo),
+                td(f.year)
+                )
+        _div += ftbl
+        _div += p()
         _div += tbl
         return _div
-

@@ -151,6 +151,7 @@ class scene(object):
                 div#artist { margin-left: 4%; }
                 div#incarn { margin-left: 6%; }
                 div#album { margin-left: 8%; }
+                div#format { margin-left: 10%; }
                 h1 { font-size: 3em; font-weight: bold; }
                 h2 { font-size: 2.6em; font-weight: bold; }
                 h3 { font-size: 2.2em; font-weight: bold; }
