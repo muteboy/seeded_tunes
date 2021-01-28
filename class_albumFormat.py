@@ -39,20 +39,22 @@ class albumFormat(object):
         self.formatNames = {
             "CD": "Compact Disc",
             "MC": "Cassette",
-            "12": "12 inch Vinyl"
+            "12": "12 inch Vinyl",
+            "PS": "A2 Poster"
         }
-        if (self.album.year <= 1983) and (self.formatType == "CD"):
-            self.year = 1983
+        self.year = self.album.year
+        if (self.album.year <= 1983):
+            self.yearCD = randint(1983, self.album.incarn.yearLast)
         else:
-            self.year = self.album.year
-
-        self.catNo = f"{self.album.catNo}-{self.formatType}"
+            self.yearCD = self.album.year
+        self.catNo = f"{self.album.incarn.artist.label.initials}.{self.formatType}.{self.album.seed}"
         self.textCopyright = f'All titles written by {self.album.surnameCredits}.'
         self.textCopyright += f' \N{COPYRIGHT SIGN} {self.album.year}'
         if self.year != self.album.year:
             self.textCopyright += f'/{self.year}'
         self.textCopyright += f' {self.album.incarn.artist.label.name}'
-        self.albumArtwork = albumArtwork(self.album, self.formatType)
+ 
+        self.albumArtwork = albumArtwork(self.album, self)
 
     def __str__(self, numTabs=5):
         return f'{numTabs * chr(9)}{self.formatNames[self.formatType]}, {self.year}'

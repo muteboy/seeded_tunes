@@ -16,12 +16,12 @@ print("\n" * 20)
 sceneCurrent = scene(
     seedInt=inputSeed,
     # seedInt=sys.argv[1],
-    numLabels=2,
+    numLabels=1,
     yearStart=1972,
     viewGv=False,
-    numArtists=3,
-    numIncarnations=2,
-    numAlbums=2,
+    numArtists=1,
+    numIncarnations=1,
+    numAlbums=1,
     numTracks=2,
     viewLog=False,
 )

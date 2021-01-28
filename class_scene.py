@@ -7,7 +7,6 @@ from collections import defaultdict
 from datetime import datetime
 from random import choice, randint, random, sample, seed, uniform
 import pdfkit
-
 import dominate
 from dominate.tags import (
     caption,

@@ -4,44 +4,37 @@ import math
 import textwrap
 from random import choice, randint, random, sample, seed, uniform
 
-# import dominate
 import svgwrite
-
-# from dominate.tags import (
-#     caption,
-#     div,
-#     h1,
-#     h2,
-#     h3,
-#     h4,
-#     h5,
-#     style,
-#     table,
-#     tbody,
-#     td,
-#     th,
-#     thead,
-#     tr,
-# )
 from tqdm import tqdm
 
 
 class albumArtwork(object):
-    def __init__(self, album, formatType):
-        hue = random()
+    def __init__(self, album, albumFormat):
         self.album = album
-        self.artColorOutline = self.albumArtBG(hue, 0.4, 0.2)
-        self.artColorBG = self.albumArtBG(hue, 0.3, 0.2)
-        self.artColorText = "white"
-        self.artDim = 210
-        self.makeSvgSymbols()
-        # self.svgSymbols.defs.add(symbolLogo)
-        self.artwork12in()
-        # self.artworkCassette() # TODO make cassettes work
-        # self.artworkCdBooklet() # TODO make CD booklet work
-        # self.artworkCdTray() # TODO make cd tray work
+        self.albumFormat = albumFormat
+        
 
-    def makeSvgLogo(self):
+        self.artColorOutline = self.album.artColorOutline
+        self.artColorBG = self.album.artColorOutline
+        self.artColorText = self.album.artColorText
+
+        self.formatType = self.albumFormat.formatType
+       # set art dimension W and H the same
+        self.artDim = 210
+        # add SVG symbols to
+        self.makeSvgSymbols()
+        # self.makeSvgLogo()
+        if self.formatType == "MC":
+            self.artworkCassette()  # TODO make cassettes work
+        elif self.formatType == "CD":
+            self.artworkCdBooklet()  # TODO make CD booklet work
+            self.artworkCdTray()  # TODO make cd tray work
+        elif self.formatType == "12":
+            self.artwork12in()
+        elif self.formatType == "PS":
+            self.artworkPoster()
+
+    def svgSymbolLogo(self):
         symbolLogo = self.svgSymbols.g(id="logo")
         svgPattern45Stripe = self.svgSymbols.pattern(
             size=(1, 1), patternUnits="userSpaceOnUse"
@@ -49,11 +42,12 @@ class albumArtwork(object):
         self.svgSymbols.defs.add(svgPattern45Stripe)
         svgPattern45Stripe.add(
             self.svgSymbols.line(
-                start=(0, 1), end=(1, 0), stroke_width=0.1, stroke="white"
+                start=(0, 1), end=(1, 0), stroke_width=0.1, stroke="white",
             )
         )
         logoDim = 10
 
+        # main rectangle
         symbolLogo.add(
             self.svgSymbols.rect(
                 size=(logoDim, logoDim),
@@ -62,6 +56,7 @@ class albumArtwork(object):
                 stroke="white",
             )
         )
+        # lower filled rectangle
         symbolLogo.add(
             self.svgSymbols.rect(
                 insert=(0, ((logoDim / 3) * 2)),
@@ -71,6 +66,7 @@ class albumArtwork(object):
                 stroke="white",
             )
         )
+        # straight lines
         symbolLogo.add(
             self.svgSymbols.path(
                 d=f"M {logoDim / 2} {logoDim / 3} L {logoDim / 2} {(logoDim / 6) * 5}",
@@ -78,6 +74,7 @@ class albumArtwork(object):
                 stroke="white",
             )
         )
+        # seed
         symbolLogo.add(
             self.svgSymbols.circle(
                 center=((logoDim / 2), ((logoDim / 6) * 5)),
@@ -85,6 +82,7 @@ class albumArtwork(object):
                 fill="white",
             )
         )
+        # leaves
         symbolLogo.add(
             self.svgSymbols.path(
                 d=f"M {logoDim / 2} {logoDim / 3} a 1 1 0 0 1 {logoDim /3} 0 z a 1 1 0 0 0 {-(logoDim /3)} 0 z ",
@@ -93,52 +91,16 @@ class albumArtwork(object):
                 fill="none",
             )
         )
-        self.svgSymbols.defs.add(symbolLogo)
-        # return symbolLogo
+        # self.svgSymbols.defs.add(symbolLogo)
+        return symbolLogo
 
-    def makeSvgSymbols(self):
-        self.albumArtworkSymbolLibraryPath = (
-            self.album.incarn.artist.label.scene.path + "\\symbolLibrary.svg"
-        )
-        self.svgSymbols = svgwrite.Drawing(
-            self.albumArtworkSymbolLibraryPath,
-            # size=("1000mm", "1000mm"),
-            # viewBox=("0 0 1000 1000"),
-            profile="full",
-        )
-        self.sym = self.svgSymbols
-        # region define clip path for symbols
-        clip_path = self.svgSymbols.defs.add(self.svgSymbols.clipPath(id="clipSquare"))
-        clip_path.add(
-            self.svgSymbols.rect(
-                (0, 0),
-                (self.artDim, self.artDim),
-                stroke="white",
-                stroke_width="0.4",
-                fill="none",
-            )
-        )
-        # endregion
-
-        # define Pattern in defs
-        svgLogoPattern = self.sym.defs.add(
-            self.svgSymbols.pattern(size=(1, 1), patternUnits="userSpaceOnUse")
-        )
-        # add pattern to Pattern defs
-        svgLogoPattern.add(
-            self.svgSymbols.line(
-                start=(0, 1), end=(1, 0), stroke_width=0.1, stroke="white"
-            )
-        )
-
-        # region RECT symbol
+    def svgSymbolRect(self):
         symbolRect = self.svgSymbols.g(id="rect")
         symbolRect.add(self.sym.rect(size=(210, 210), fill="white"))
         symbolRect.add(self.sym.circle(center=(50, 100), r=(30), fill="red"))
-        self.svgSymbols.defs.add(symbolRect)
-        # endregion
+        return symbolRect
 
-        # region 3triangles symbol
+    def svgSymbol3Triangles(self):
         symbolArt3Triangles = self.svgSymbols.g(id="3triangles", stroke_width="0")
         for _ in range(1, 4):
             symbolArt3Triangles.add(
@@ -151,14 +113,12 @@ class albumArtwork(object):
                     fill="white",
                 )
             )
-        self.svgSymbols.defs.add(symbolArt3Triangles)
-        # endregion
+        return symbolArt3Triangles
 
-        # region 4quadrants symbol
+    def svgSymbol4Quads(self):
         symbolArt4Quadrants = self.svgSymbols.g(
             id="4quadrants", stroke_width="0", fill="white"
         )
-        self.svgSymbols.defs.add(symbolArt4Quadrants)
         dim100 = self.artDim
         dim050 = dim100 / 2
         gap = 4
@@ -193,11 +153,10 @@ class albumArtwork(object):
                 d=f"M {dim050 + (gap/2)} {dim050 + (gap/2)} v {sey} a {sex} {sey} 0 0 0 {sex} {-sey} z ",
             )
         )
-        # endregion
+        return symbolArt4Quadrants
 
-        # region define symbol circles
+    def svgSymbolCircles(self):
         symbolArtCircles = self.svgSymbols.g(id="circles")
-        self.svgSymbols.defs.add(symbolArtCircles)
         for _ in range(1, randint(10, 20)):
             symbolArtCircles.add(
                 self.svgSymbols.circle(
@@ -208,11 +167,10 @@ class albumArtwork(object):
                     fill="none",
                 )
             )
-            # endregion
+        return symbolArtCircles
 
-        # region define symbol rays
+    def svgSymbolRays(self):
         symbolArtRays = self.svgSymbols.g(id="rays", clip_path="url(#clipSquare)")
-        self.svgSymbols.defs.add(symbolArtRays)
         # for _ in range(1, randint(1, 3) + 1):
         for _ in range(1, 5):
             # angle1 = (i / (numCirclePoints/2)) * math.pi
@@ -236,7 +194,87 @@ class albumArtwork(object):
                     fill="white",
                 )
             )
-        # endregion
+        return symbolArtRays
+
+    def svgSymbol1Circle(self):
+        symbol1Circle = self.svgSymbols.g(id="1circle")
+        symbol1Circle.add(
+            self.svgSymbols.circle(
+                id="circle", center=(105, 105), r=(105), fill="white"
+            )
+        )
+        return symbol1Circle
+
+    def svgSymbolHalfCircleEmpty(self):
+        symbolHalfCircleEmpty = self.sym.g(
+            id="halfcircleempty", fill="none", stroke_width="5", stroke="white"
+        )
+        if random() > 0.5:
+            symbolHalfCircleEmpty.add(self.sym.rect(size=(self.artDim, self.artDim),))
+        symbolHalfCircleEmpty.add(
+            self.sym.path(
+                d=f"M 0 0 A {self.artDim/2} {self.artDim/2} 0 0 0 {self.artDim} 0 z",
+                fill="none",
+            )
+        )
+        symbolHalfCircleEmpty.rotate(
+            (randint(0, 3) * 90), center=((self.artDim / 2), (self.artDim / 2))
+        )
+        return symbolHalfCircleEmpty
+
+    def svgSymbolCircleEmpty(self):
+        symbolCircleEmpty = self.sym.g(
+            id="circleempty", fill="none", stroke_width="5", stroke="white"
+        )
+        if random() > 0.5:
+            symbolCircleEmpty.add(self.sym.rect(size=(self.artDim, self.artDim),))
+        symbolCircleEmpty.add(
+            self.sym.circle(
+                center=((self.artDim / 2), (self.artDim / 2)),
+                r=(self.artDim * 0.45),
+                fill="none",
+            )
+        )
+        return symbolCircleEmpty
+
+    def makeSvgSymbols(self):
+        self.albumArtworkSymbolLibraryPath = (
+            self.album.incarn.artist.label.scene.path + "\\symbolLibrary.svg"
+        )
+        # create SVG object to contain all symbols for all formats of artwork
+        self.svgSymbols = svgwrite.Drawing(
+            self.albumArtworkSymbolLibraryPath,
+            # size=("1000mm", "1000mm"),
+            # viewBox=("0 0 1000 1000"),
+            profile="full",
+            id="symbols",
+        )
+        self.sym = self.svgSymbols
+        # define clip path for symbols
+        clip_path = self.svgSymbols.defs.add(self.svgSymbols.clipPath(id="clipSquare"))
+        clip_path.add(
+            self.svgSymbols.rect(
+                (0, 0),
+                (self.artDim, self.artDim),
+                stroke="white",
+                stroke_width="0.4",
+                fill="none",
+            )
+        )
+        self.sym.defs.add(self.artworkDesign())
+
+        # region logo pattern
+        # define logo hatch pattern in defs
+        # svgLogoPattern = self.sym.defs.add(
+        #     self.svgSymbols.pattern(size=(1, 1), patternUnits="userSpaceOnUse")
+        # )
+        # # add logo hatch pattern to Pattern defs
+        # svgLogoPattern.add(
+        #     self.svgSymbols.line(
+        #         start=(0, 1), end=(1, 0), stroke_width=0.1, stroke="white"
+        #     )
+        # )
+        # # endregion
 
         # region define diagonal half fill
         # symbolArtDiagHalfFill = self.sym.g(
@@ -245,14 +283,6 @@ class albumArtwork(object):
         # self.sym.defs.add(
         #     self.sym.path(d=f"M 0 0 L {self.artDim} 0 {self.artDim} {self.artDim} Z")
         # )
-        # endregion
-
-        # region symbol circle
-        self.svgSymbols.defs.add(
-            self.svgSymbols.circle(
-                id="circle", center=(105, 105), r=(105), fill="white"
-            )
-        )
         # endregion
 
         # region define angle - square with 90 degree angle
@@ -283,24 +313,6 @@ class albumArtwork(object):
             )
         )
         symbolSector.rotate(
-            (randint(0, 3) * 90), center=((self.artDim / 2), (self.artDim / 2))
-        )
-        # endregion
-
-        # region define halfcircleempty
-        symbolHalfCircleEmpty = self.sym.g(
-            id="halfcircleempty", fill="none", stroke_width="5", stroke="white"
-        )
-        self.sym.defs.add(symbolHalfCircleEmpty)
-        if random() > 0.5:
-            symbolHalfCircleEmpty.add(self.sym.rect(size=(self.artDim, self.artDim),))
-        symbolHalfCircleEmpty.add(
-            self.sym.path(
-                d=f"M 0 0 A {self.artDim/2} {self.artDim/2} 0 0 0 {self.artDim} 0 z",
-                fill="none",
-            )
-        )
-        symbolHalfCircleEmpty.rotate(
             (randint(0, 3) * 90), center=((self.artDim / 2), (self.artDim / 2))
         )
         # endregion
@@ -353,22 +365,6 @@ class albumArtwork(object):
         )
         # endregion
 
-        # region define circle empty
-        symbolCircleEmpty = self.sym.g(
-            id="circleempty", fill="none", stroke_width="5", stroke="white"
-        )
-        self.sym.defs.add(symbolCircleEmpty)
-        if random() > 0.5:
-            symbolCircleEmpty.add(self.sym.rect(size=(self.artDim, self.artDim),))
-        symbolCircleEmpty.add(
-            self.sym.circle(
-                center=((self.artDim / 2), (self.artDim / 2)),
-                r=(self.artDim * 0.45),
-                fill="none",
-            )
-        )
-        # endregion
-
         # region define reeds
         symbolReeds = self.sym.g(
             id="reeds", fill="none", stroke_width="1", stroke="white"
@@ -388,14 +384,27 @@ class albumArtwork(object):
 
         # endregion
 
-    def albumArtBG(self, hue, lightness, saturation):
-        """ Choose colour, based on seed, Hue, Saturation, Lightness """
-        # hlsList=(random(),0.3,0.2)
-        rgbList = colorsys.hls_to_rgb(hue, lightness, saturation)
-        svgCol = svgwrite.utils.rgb(
-            rgbList[0] * 255, rgbList[1] * 255, rgbList[2] * 255
+        self.sym.defs.add(self.svgSymbolRect())
+        self.sym.defs.add(self.svgSymbol3Triangles())
+        self.sym.defs.add(self.svgSymbol4Quads())
+        self.sym.defs.add(self.svgSymbolCircles())
+        self.sym.defs.add(self.svgSymbolRays())
+        self.sym.defs.add(self.svgSymbol1Circle())
+        self.sym.defs.add(self.svgSymbolHalfCircleEmpty())
+        self.sym.defs.add(self.svgSymbolCircleEmpty())
+        self.sym.defs.add(self.svgSymbolLogo())
+
+    def artworkDesign(self):
+        """ create artwork design as a symbol for use by all formats """
+        # TODO move artwork design to here
+        symbolArtworkDesign = self.sym.g(
+            id="art", fill="none", stroke_width="1", stroke="white"
         )
-        return svgCol
+        symbolArtworkDesign.add(self.sym.rect(size=(20,20),))
+        # TODO add design to the group here
+
+        return symbolArtworkDesign
+
 
     def artworkOutline(self, dwg, stroke, strokeWidth, fill, strokeDasharray, rectDims):
         self.group = dwg.add(
@@ -867,6 +876,7 @@ class albumArtwork(object):
                 ],
             )
         )
+        # define values for all the texts to be used
         textLines = [
             # 	size, x, y, anchor, weight, text, id, font, transform,
             [
@@ -877,7 +887,7 @@ class albumArtwork(object):
                 "start",
                 "normal",
                 f"{self.album.incarn.artist.name} \N{NO-BREAK SPACE}\N{NO-BREAK SPACE}\N{BULLET}\N{NO-BREAK SPACE}\N{NO-BREAK SPACE} {self.album.name}",
-                "NameSpine",
+                "spineName",
                 "Alte Haas Grotesk",
                 True,
             ],
@@ -889,7 +899,7 @@ class albumArtwork(object):
                 "start",
                 "normal",
                 f"{self.album.incarn.artist.name} \N{NO-BREAK SPACE}\N{NO-BREAK SPACE}\N{BULLET}\N{NO-BREAK SPACE}\N{NO-BREAK SPACE} {self.album.name}",
-                "NameSpine",
+                "spineName",
                 "Alte Haas Grotesk",
                 True,
             ],
@@ -1005,7 +1015,231 @@ class albumArtwork(object):
         svgCdTray.save()
         return
 
-    # TODO do artwork for poster
+    def artworkPoster(self):
+        svgPath = self.album.path + "\\Artwork_A2_Poster.svg"
+        svgPosterA2 = svgwrite.Drawing(
+            svgPath, size=("420mm", "594mm"), viewBox=("0 0 420 594"), profile="full",
+        )
+        svgPosterA2.defs.add(self.svgSymbols)
+        svgPosterA2.add(
+            self.artworkOutline(
+                svgPosterA2,
+                self.artColorOutline,
+                "0.2",
+                self.artColorBG,
+                "1",
+                [[(0, 0), (420, 594)],],  # single large rectangle
+            )
+        )
+        artIds = [
+            "logo",  # 0
+            "rect",
+            "3triangles",
+            "4quadrants",
+            "circles",
+            "rays",
+            "angle",
+            "sector",
+            "halfcircleempty",  # 8
+            "halfcirclefilled",
+            "diagonal",
+            "circlefilled",
+            "circleempty",
+            "reeds",  # 13
+        ]
+        # artChosen = "#" + artIds[randint(0, (len(artIds)))]
+        artChosen1 = "#" + artIds[randint(0, (len(artIds)) - 1)]
+        artChosen2 = "#" + artIds[6]
+        # if choice(["grid", "single"]) == "grid":
+        # if random() > 1:  # single
+        if 1 == 1:  # single
+            # front art
+            svgPosterA2.add(
+                svgPosterA2.use(
+                    href=(artChosen1), transform="translate(145 70) scale(0.7)"
+                )
+            )
+        else:  # grid
+            gridDim = randint(4, 8)
+            gridGap = randint(2, 6)
+            gridCellDim = (self.artDim - ((gridDim - 1) * gridGap)) / gridDim
+            symbolChosen1 = svgPosterA2.g(id="chosen1")
+            svgPosterA2.defs.add(symbolChosen1)
+            symbolChosen1.add(
+                svgPosterA2.use(
+                    href=(artChosen1),
+                    stroke="white",
+                    stroke_width="0.1",
+                    fill="blue",
+                    # transform="rotate(0)",
+                )
+            )
+            symbolChosen2 = svgPosterA2.g(id="chosen2")
+            svgPosterA2.defs.add(symbolChosen2)
+            symbolChosen2.add(
+                svgPosterA2.use(
+                    href=(artChosen2),
+                    stroke="white",
+                    stroke_width="0.1",
+                    fill="red",
+                    # transform="rotate(0)",
+                )
+            )
+
+            for row in range(0, gridDim):
+                for column in range(0, gridDim):
+                    artInsert = svgPosterA2.use(
+                        href=("chosen1" if (random() > 0.5) else "chosen2"),
+                    )
+                    artInsert.translate(
+                        400 + (column * gridCellDim) + (column * gridGap),
+                        70 + (row * gridCellDim) + (row * gridGap),
+                    )
+                    artInsert.scale(gridCellDim / self.artDim)
+                    svgPosterA2.add(artInsert)
+
+                    # , transform=f"translate({400 + (column * gridCellDim) + (column * gridGap)} {70 + (row * gridCellDim)+(row * gridGap)}) scale({gridCellDim/(self.artDim)}) ", stroke="white", stroke_width="0.1", fill="none",)
+                    # svg12in.use(href=(artChosen), transform=f"translate({400 + (column * gridCellDim) + (column * gridGap)} {70 + (row * gridCellDim)+(row * gridGap)}) scale({gridCellDim/(self.artDim)}) ", stroke="white", stroke_width="0.1", fill="none",)
+        # # region add logos
+        # # add logo symbol front
+        # svg12in.add(
+        #     svg12in.use(href=("#logo"), transform="translate(590 290) scale(2)",)
+        # )
+        # # add logo symbol back
+        # svg12in.add(
+        #     svg12in.use(href=("#logo"), transform="translate(20 270) scale(2)",)
+        # )
+        # # endregion
+
+        # add outlines for layout
+        svgPosterA2.add(
+            self.artworkOutline(
+                svgPosterA2,
+                "white",
+                "0.2",
+                "none",
+                "1",
+                [
+                    [(20, 20), (380, 380)],
+                    # [(20, 410), (380, 164)],
+                    # [(385, 559), (15, 15)],
+                    # [(20, 450), (380, 10)],
+                ],
+            )
+        )
+        # add logo symbol front
+        svgPosterA2.add(
+            svgPosterA2.use(href=("#logo"), transform="translate(380 555) scale(2)",)
+        )
+
+        formatTexts=[
+            f"Compact Cassette",
+            f"12\" Vinyl",
+            f"Compact Disc",
+        ]
+        for i, t in enumerate(formatTexts):
+            svgPosterA2.add(svgPosterA2.text( f"{t}", insert=((305), (540 + (i * 5))), stroke_width="0", font_size=4, text_anchor="start", fill="white",stroke="white",font_family="Alte Haas Grotesk"))
+
+        catNoTexts=[
+            f"{self.album.incarn.artist.label.initials}.MC.{self.album.seed} {self.albumFormat.year}",
+            f"{self.album.incarn.artist.label.initials}.12.{self.album.seed} {self.albumFormat.year}",
+            f"{self.album.incarn.artist.label.initials}.CD.{self.album.seed} {self.albumFormat.yearCD}",
+        ]
+        for i, t in enumerate(catNoTexts):
+            svgPosterA2.add(svgPosterA2.text( f"{t}", insert=((400), (540 + (i * 5))), stroke_width="0", font_size=4, text_anchor="end", fill="white",stroke="white",font_family="Alte Haas Grotesk"))
+
+        
+        # Single lines of text
+
+        textLines = [
+            # 	size, x, y, anchor, weight, text, id, font, transform,
+            [
+                svgPosterA2,
+                "18",
+                400,
+                425,
+                "end",
+                "bold",
+                self.album.incarn.artist.name,
+                "artistFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+            [
+                svgPosterA2,
+                "18",
+                400,
+                450,
+                "end",
+                "normal",
+                self.album.name,
+                "albumFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+            [
+                svgPosterA2,
+                "1.5mm",
+                377,
+                564,
+                "end",
+                "normal",
+                self.album.incarn.artist.label.name,
+                "labelNameFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+            [
+                svgPosterA2,
+                "1mm",
+                377,
+                570,
+                "end",
+                "normal",
+                self.album.seed,
+                "pixelSeed",
+                "SeedBinaryPixel",
+                False,
+            ],
+            [
+                svgPosterA2,
+                "1mm",
+                20,
+                574,
+                "start",
+                "normal",
+                self.album.svgTagline,
+                "taglineFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+
+
+            # [
+            #     svgPosterA2,
+            #     "1.5mm",
+            #     400,
+            #     470,
+            #     "end",
+            #     "normal",
+            #     f"{self.album.seed}",
+            #     "catNo",
+            #     "Alte Haas Grotesk",
+            #     False,
+            # ],
+            # [svg12in, '1mm', 20, 310, 'start', 'normal', self.album.artist.label.name, 'labelNameBack', 'Alte Haas Grotesk', False],
+        ]
+        for t in textLines:
+            svgPosterA2.add(
+                self.artworkTextOneLine(
+                    t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9]
+                )
+            )
+        
+        # add markers for layout
+        svgPosterA2.add(self.svgMarkers(svgPosterA2, 430, 600, 10, show=False))
+        svgPosterA2.save()
+        return
 
     def artwork12in(self):
         svg12in = svgwrite.Drawing(

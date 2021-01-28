@@ -3,7 +3,7 @@ import datetime
 import os
 import textwrap
 from random import choice, randint, random, sample, seed, uniform
-
+import colorsys
 import dominate
 from dominate.tags import (
     caption,
@@ -25,7 +25,7 @@ from dominate.tags import (
     tr,
 )
 from tqdm import tqdm
-
+import svgwrite
 from class_albumArtwork import albumArtwork
 from class_albumFormat import albumFormat
 from class_track import track
@@ -38,9 +38,9 @@ class album(object):
         self.seed = int(str(self.incarn.seed) + format(number, "02d"))
         self.number = number
         self.albumID = f"{self.incarn.artist.artistID}.R{number}"
-        self.formatTypes = ["CD", "MC", "12"]
+        self.formatTypes = ["CD", "MC", "12", "PS"]
         self.formats = []
-        self.catNo = f"{self.incarn.artist.label.initials}{self.seed}"
+        self.catNo = f"{self.incarn.artist.label.initials}.{self.seed}"
         # TODO LATER make catNo sequential across whole label, not within artist. Hard
         self.name = self.incarn.artist.label.scene.wordList.combineRandomLinesFromFile(
             numWords=randint(1, 3)
@@ -57,7 +57,7 @@ class album(object):
             self.numTracks = randint(1, self.incarn.artist.label.scene.numTracks)
         if self.numTracks < 5:
             self.name += " EP"
-        self.svgTagline = "ELECTRONIC MUSIC GENERATED AND RECORDED DIGITALLY BY SEED"
+        self.svgTagline = "ELECTRONIC MUSIC AND ART GENERATED AND RECORDED DIGITALLY BY SEED"
         nbsp = "\N{NO-BREAK SPACE}"
         self.surnameCredits = "\N{NO-BREAK SPACE}/\N{NO-BREAK SPACE}".join(
             [p.surname for p in self.people]
@@ -81,8 +81,16 @@ class album(object):
         ):
             self.tracks.append(track(self, num))
         # self.textCopyright = f'All titles written by {self.surnameCredits}. \N{COPYRIGHT SIGN} {self.year} {self.artist.label.name}'
+        # choose colors for artwork
+
+        hue = random()
+        self.artColorOutline = self.albumArtBG(hue, 0.15, 0.2)
+        self.artColorBG = self.albumArtBG(hue, 0.3, 0.2)
+        self.artColorText = "white"
+
         for formatType in self.formatTypes:
             self.formats.append(albumFormat(self, formatType))
+        # albumArtwork(self, )
         # self.albumArtwork = albumArtwork(self)
 
     def __str__(self, numTabs=4):
@@ -137,3 +145,12 @@ class album(object):
         _div += p()
         _div += tbl
         return _div
+    def albumArtBG(self, hue, lightness, saturation):
+        """ Choose colour, based on seed, Hue, Saturation, Lightness """
+        # hlsList=(random(),0.3,0.2)
+        rgbList = colorsys.hls_to_rgb(hue, lightness, saturation)
+        # rgbList = colorsys.hsv_to_rgb(hue, saturation, lightness)
+        svgCol = svgwrite.utils.rgb(
+            rgbList[0] * 255, rgbList[1] * 255, rgbList[2] * 255
+        )
+        return svgCol

@@ -36,6 +36,8 @@ class label(object):
         )
         self.yearLast = randint(self.yearFirst, self.scene.yearNow)
         self.years = []
+        # TODO choose number of artists, then incarnations, then albums.
+        # TODO THEN, before defining all the objects, make a long list and assign the catalog numbers
         self.numArtists = (
             randint(1, 6) if self.scene.numArtists == 0 else randint(1, self.scene.numArtists)
         )
@@ -58,7 +60,6 @@ class label(object):
             range(1, self.numArtists + 1), desc="03 Artists".ljust(18), position=3
         ):
             self.artists.append(artist(self, num))
-        # get first and last years for the label
         # get people used for the label
         for a in self.artists:
             self.artistPeople.extend(a.people)
@@ -68,6 +69,7 @@ class label(object):
                 self.albumCatalog += i.albums
         self.artistPeople = list(set(self.artistPeople))
         self.people = self.artistPeople
+        # get first and last years for the label
         self.albumCatalog = sorted(self.albumCatalog, key=lambda a: a.year)
         self.years = list(dict.fromkeys(self.years))
         self.yearFirst = min(self.years)
