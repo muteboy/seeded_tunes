@@ -147,14 +147,14 @@ class track(object):
         return
 
     def html(self):
-        _tbody = tbody()
-        _tbody += tr(
+        # _tbody = tbody()
+        _tr = tr(
             td(f"{self.number:02d}."),
             td(self.name),
             td(f"{self.beatsPerMinute}bpm"),
             td(self.lengthMMSS),
             td(self.barsPerMinute),
-            td(self.stepsPerSecond),
+            td(round(self.stepsPerSecond)),
             td(self.stepsPerBar),
             # td(self.minutesGoal),
             td(self.secondsGoal),
@@ -164,7 +164,7 @@ class track(object):
             td(self.beatsGoalRound),
             td(self.stepsGoal),
             td(self.stepsRound),
-            td(self.secondsRound),
+            td(round(self.secondsRound)),
             td(self.stepLength),
             td(self.lengthSteps),
             td(self.beatsActual),
@@ -175,7 +175,7 @@ class track(object):
             td(str(self.seqHhc)),
             td(str(self.seqHho)),
             )
-        return _tbody
+        return _tr
 
     def trackBar(
         self,

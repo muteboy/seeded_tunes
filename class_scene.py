@@ -85,17 +85,17 @@ class scene(object):
         self.people = list(set(self.labelPeople))
         self.name = f'The "{self.seed}" Music Scene of {self.yearFirst}'
         if self.yearFirst == self.yearLast:
-            self.name += ' CE'
+            self.name += " CE"
         else:
-            self.name += f' to {self.yearLast} CE'
+            self.name += f" to {self.yearLast} CE"
         self.initHTML()
         self.logScene()
         self.graphScene()
         self.graphPeopleLinks()
-        # os.rename(self.path + "_NEW", self.path)
-        self.gvGraph.render(
-            self.gvGraph.filename, view=True
-        ) if viewGv else self.gvGraph.render(self.gvGraph.filename, view=False)
+        if viewGv==True:
+            self.gvGraph.render(self.gvGraph.filename, view=True)
+        else:
+            self.gvGraph.render(self.gvGraph.filename, view=False)
 
     def scenePeople(self, numPeople):
         """ Returns list of people """
@@ -164,6 +164,9 @@ class scene(object):
                 h6 { font-size: 1em;   font-weight: bold; }
                 table { border-collapse: collapse; }
                 th { border-bottom: 1px solid black; }
+                table#albumTrackTable tbody tr td:nth-child(even) { background: #bababa }
+                table#albumFormatTable tbody tr td:nth-child(even) { background: #bababa }
+
             """
             )
 
@@ -201,7 +204,11 @@ class scene(object):
                         d += album.html()
         with open(self.docPathHtml, "w", encoding="utf8") as file:
             file.write(self.doc.render())
-        pdfkit.from_file(self.docPathHtml, self.docPathPdf)
+        pdfkit.from_file(
+            self.docPathHtml,
+            self.docPathPdf,
+            options={"log-level": "info", "page-size": "A4",},
+        )
         if self.viewLog:
             os.startfile(self.docPathHtml)
             os.startfile(self.docPathPdf)

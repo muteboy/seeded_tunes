@@ -132,8 +132,11 @@ class album(object):
         # tbl = table(id=self.name, caption=self.name, style="font-size:80%")
         tbl = table(id="albumTrackTable", caption=self.name, style="font-size:80%")
         tbl += thead(tr(th(tableHead) for tableHead in albumTableHeaders), style="",)
+        # tbl += 
+        _tbody = tbody()
         for tk in tqdm(self.tracks, desc="16 Log Tracks".ljust(18), position=16,):
-            tbl += tk.html()
+            _tbody += tk.html()
+        tbl += _tbody
         ftbl = table(id="albumFormatTable", caption=self.name, style="font-size:100%")
         ftbl += thead(
             tr(th(tableHead) for tableHead in ["Format", "Cat No", "Year of Release"]),
@@ -145,6 +148,7 @@ class album(object):
         _div += p()
         _div += tbl
         return _div
+
     def albumArtBG(self, hue, lightness, saturation):
         """ Choose colour, based on seed, Hue, Saturation, Lightness """
         # hlsList=(random(),0.3,0.2)
