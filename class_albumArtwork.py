@@ -1,12 +1,11 @@
 # # -*- coding: utf-8 -*-
 import colorsys
 import math
-import textwrap
-from random import choice, randint, random, sample, seed, uniform, choices
-from inspect import getmembers, isfunction
-import svgwrite
 import re
-
+import textwrap
+from inspect import getmembers, isfunction
+from random import choice, choices, randint, random, sample, seed, uniform
+import svgwrite
 from tqdm import tqdm
 
 
@@ -20,8 +19,7 @@ class albumArtwork(object):
         self.formatType = self.albumFormat.formatType
 
         # set art dimension W and H the same
-        self.artDim = 210
-
+        self.artDim = 100
         self.makeSvgSymbols()
 
         self.artTypeFunctions = [
@@ -29,7 +27,7 @@ class albumArtwork(object):
             for f in getmembers(albumArtwork, isfunction)
             if (re.match(r"svgSymbol*", f[0]))
         ]
-
+        self.artwork = self.artworkDesign()
         if self.formatType == "MC":
             self.artworkCassette()  # TODO make cassettes work
         elif self.formatType == "CD":
@@ -55,7 +53,6 @@ class albumArtwork(object):
     def svgSymbolLogo(self, svgId="logo"):
         symbolLogo = self.svgSymbols.g(id=svgId)
         logoDim = 10
-
         # main rectangle
         symbolLogo.add(
             self.svgSymbols.rect(
@@ -127,7 +124,7 @@ class albumArtwork(object):
 
     def svgSymbolRect(self, svgId="rect"):
         symbolRect = self.svgSymbols.g(id=svgId)
-        symbolRect.add(self.sym.rect(size=(210, 210), fill="white"))
+        symbolRect.add(self.sym.rect(size=(self.artDim, self.artDim), fill="white"))
         return symbolRect
 
     def svgSymbol3Triangles(self, svgId="3triangles", gridUse="single"):
@@ -226,15 +223,6 @@ class albumArtwork(object):
             )
         return symbolArtRays
 
-    # def svgSymbol1Circle(self, svgId="1circle"):
-    #     symbol1Circle = self.svgSymbols.g(id=svgId)
-    #     symbol1Circle.add(
-    #         self.svgSymbols.circle(
-    #             id="circle", center=(105, 105), r=(105), fill="white"
-    #         )
-    #     )
-    #     return symbol1Circle
-
     def svgSymbolHalfCircleEmpty(self, svgId="halfcircleempty", gridUse=""):
         symbolHalfCircleEmpty = self.sym.g(
             id=svgId, fill="none", stroke_width="5", stroke="white"
@@ -243,7 +231,7 @@ class albumArtwork(object):
             symbolHalfCircleEmpty.add(self.sym.rect(size=(self.artDim, self.artDim),))
         symbolHalfCircleEmpty.add(
             self.sym.path(
-                d=f"M 0 0 A {self.artDim/2} {self.artDim/2} 0 0 0 {self.artDim} 0 z",
+                d=f"M 0 0 A {self.artDim / 2} {self.artDim / 2} 0 0 0 {self.artDim} 0 z",
                 fill="none",
             )
         )
@@ -267,7 +255,7 @@ class albumArtwork(object):
         )
         return symbolCircleEmpty
 
-    def svgSymbolHalfFillDiagonal(self, svgId="diag_half_fill", gridUse=""):
+    def svgSymbolHalfFillDiagonal(self, svgId="diagHalfFill", gridUse=""):
         symbolArtDiagHalfFill = self.sym.g(id=svgId, clip_path="url(#clipSquare)")
         symbolArtDiagHalfFill.add(
             self.sym.path(d=f"M 0 0 L {self.artDim} 0 {self.artDim} {self.artDim} Z")
@@ -308,11 +296,11 @@ class albumArtwork(object):
 
     def svgSymbolCircleFilled(self, svgId="circlefilled", gridUse="both"):
         symbolCircleFilled = self.sym.g(
-            id=svgId, fill="none", stroke_width="5", stroke="white"
+            id=svgId, fill="none", stroke_width="1", stroke="white"
         )
         if random() > 0.5:
             symbolCircleFilled.add(
-                self.sym.rect(size=(self.artDim, self.artDim), fill="white",)
+                self.sym.rect(size=(self.artDim, self.artDim), fill="none",)
             )
         symbolCircleFilled.add(
             self.sym.circle(
@@ -394,33 +382,42 @@ class albumArtwork(object):
         self.sym = self.svgSymbols
         self.sym.defs.add(self.artworkDesign())
         self.svgClipPaths()
-        # self.sym.defs.add(self.svgSymbolRect())
-        # self.sym.defs.add(self.svgSymbolHalfCircleFilled())
-        # self.sym.defs.add(self.svgSymbolQuarterCircle())
-        # self.sym.defs.add(self.svgSymbolDiagonal())
-        # self.sym.defs.add(self.svgSymbolCircleFilled())
-        # self.sym.defs.add(self.svgSymbolReeds())
-        # self.sym.defs.add(self.svgSymbol3Triangles())
-        # self.sym.defs.add(self.svgSymbol4Quads())
-        # self.sym.defs.add(self.svgSymbolCircles())
-        # self.sym.defs.add(self.svgSymbolRays())
-        # self.sym.defs.add(self.svgSymbol1Circle())
-        # self.sym.defs.add(self.svgSymbolHalfCircleEmpty())
-        # self.sym.defs.add(self.svgSymbolCircleEmpty())
         self.sym.defs.add(self.svgSymbolLogo())
-        # self.sym.defs.add(self.svgSymbolHalfFillDiagonal())
-        # self.sym.defs.add(self.svgSymbolElbowAngle())
 
-    def artworkDesign(self):
+    def artworkDesign(self,):
         """ create artwork design as a symbol for use by all formats """
-        # TODO move artwork design to here
-        symbolArtworkDesign = self.sym.g(
-            id="art", fill="none", stroke_width="1", stroke="white"
-        )
-        symbolArtworkDesign.add(self.sym.rect(size=(20, 20),))
-        # TODO add design to the group here
+        symbolArtwork = self.sym.g(id="artwork",)
+        symbolArtwork.add(self.sym.rect(size=(self.artDim, self.artDim), fill="white"))
 
-        return symbolArtworkDesign
+        # artChosenFunctions = [
+        #     self.artTypeFunctions[4],
+        #     self.artTypeFunctions[3],
+        # ]  # fixed temp
+        # # add definitions of chosen symbols
+        # svgPosterA2.defs.add(artChosenFunctions[0][1](self))
+        # svgPosterA2.defs.add(artChosenFunctions[1][1](self))
+        # artChosenId1 = "#" + artChosenFunctions[0][1].__defaults__[0]
+        # artChosenId2 = "#" + artChosenFunctions[1][1].__defaults__[0]
+        # grid = False
+        # # if 1 == 1:  # single temp
+        # if grid != True:  # single
+        #     # front art
+        #     svgPosterA2.add(
+        #         svgPosterA2.use(
+        #             href=(artChosenId1), transform="translate(20 20) scale(3.8)"
+        #         )
+        #     )
+        # else:  # grid
+        #     self.artworkGrid(
+        #         svgObject=svgPosterA2,
+        #         s1=artChosenId1,
+        #         s2=artChosenId2,
+        #         startX=20,
+        #         startY=20,
+        #         artDim=self.artDim,
+        #     )
+
+        return symbolArtwork
 
     def artworkOutline(self, dwg, stroke, strokeWidth, fill, strokeDasharray, rectDims):
         self.group = dwg.add(
@@ -534,106 +531,6 @@ class albumArtwork(object):
             pass
         return markers
 
-    def svgShapeGrid(
-        self,
-        id="shapegrid",
-        shapeUsed=0,
-        gridSize=6,
-        width=1000,
-        height=1000,
-        fractionOfCell=0.7,
-    ):
-        dwg = svgwrite.Drawing(
-            f"{id}.svg",
-            size=(f"{width}mm", f"{height}mm"),
-            viewBox=(f"0 0 {width} {height}"),
-            profile="full",
-        )
-        seed(self.album.seed)
-        cellSize = width / gridSize
-        dwg.add(dwg.rect(insert=(0, 0), size=(width + 20, height + 20), fill="#545454"))
-        gridShapeSymbol1 = dwg.symbol(id="gridShape1")
-        gridShapeSymbol2 = dwg.symbol(id="gridShape2")
-        dwg.defs.add(gridShapeSymbol1)
-        dwg.defs.add(gridShapeSymbol2)
-        gridShapeSymbols = [
-            # dwg.line(start=(-cellSize, (cellSize/2)), end=((cellSize*2),(cellSize/2)), transform=f'rotate({randint(0,180)} {cellSize/2} {cellSize/2})'),
-            dwg.path(
-                d=f"M 0 {cellSize*0.2} h {cellSize} M 0 {cellSize*0.4} h {cellSize} M 0 {cellSize*0.6} h {cellSize} M 0 {cellSize*0.8} h {cellSize}",
-                stroke_width="3",
-            ),  # 4 stripes
-            dwg.rect(
-                insert=(0, 0), size=(cellSize, cellSize), fill="white", stroke_width="1"
-            ),  # square
-            dwg.path(
-                d=f"M 0 0 L {cellSize} 0 0 {cellSize} Z", fill="white", stroke_width="1"
-            ),  # corner triangle
-            dwg.path(
-                d=f"M -2 -2 L {cellSize+2} {cellSize+2}",
-                stroke="white",
-                stroke_width="1",
-                stroke_linecap="butt",
-            ),  # Slash
-            dwg.path(
-                d=f"M 1 0 A {(cellSize-2)/2} {(cellSize-2)/2} 0 0 0 {cellSize-1} 0 ",
-                fill="none",
-                stroke_width="1",
-            ),  # empty semicircle
-            dwg.path(
-                d=f"M 1 0 A {(cellSize-2)/2} {(cellSize-2)/2} 0 0 0 {cellSize-1} 0 Z",
-                fill="white",
-                stroke_width="1",
-            ),  # filled semicircle
-            dwg.path(
-                d=f"M {cellSize/2} 0 v {cellSize/2} h {cellSize/2}",
-                fill="none",
-                stroke_width="1",
-            ),  # 90 angle
-            dwg.path(
-                d=f"M 0 {-(cellSize/2)} A {cellSize/2} {cellSize/2} 0 0 1 0 {cellSize/2}",
-                fill="none",
-                stroke_width="1",
-            ),  # empty quarter circle
-            dwg.path(
-                d=f"M 0 {-(cellSize/2)} A {cellSize/2} {cellSize/2} 0 0 1 0 {cellSize/2}",
-                fill="white",
-                stroke_width="1",
-            ),  # filled quarter circle
-            dwg.circle(
-                center=((cellSize / 2), (cellSize / 2)),
-                r=(cellSize * 0.4),
-                fill="white",
-            ),  # filled circle
-            dwg.circle(
-                center=((cellSize / 2), (cellSize / 2)), r=(cellSize * 0.4), fill="none"
-            ),  # empty circle
-        ]
-        shapeSample = sample(gridShapeSymbols, k=2)
-        gridShapeSymbol1.add(shapeSample[0])
-        gridShapeSymbol2.add(shapeSample[1])
-        # gridShapeSymbol1.add(choice(gridShapeSymbols))
-        # gridShapeSymbol2.add(choice(gridShapeSymbols))
-        rotateAmount = randint(0, 3) * 90
-        for row in range(0, gridSize):
-            for column in range(0, gridSize):
-                if random() > 0.5:
-                    shapeUsed = gridShapeSymbol1
-                else:
-                    shapeUsed = gridShapeSymbol2
-                dwg.add(
-                    dwg.use(
-                        shapeUsed,
-                        insert=((column * cellSize), (row * cellSize)),
-                        size=(cellSize, cellSize),
-                        stroke_width="1",
-                        stroke="white",
-                        transform=f"rotate({rotateAmount} {(column*cellSize)+(cellSize/2)} {(row*cellSize)+(cellSize/2)})",
-                    )
-                )
-                # dwg.add(dwg.text(f'{row}/{column}', insert=((column*cellSize), (row*cellSize)+4), font_size=3, font_family='Arial'))
-        dwg.save()
-        return
-
     def artworkCassette(self):
         width = 190
         height = 120
@@ -643,9 +540,11 @@ class albumArtwork(object):
             viewBox=(f"0 0 {width} {height}"),
             profile="full",
         )
-        svgCassette.add(
+        s = svgCassette
+        s.defs.add(self.svgSymbolLogo())
+        s.add(
             self.artworkOutline(
-                svgCassette,
+                s,
                 self.artColorOutline,
                 "0.2",
                 self.artColorBG,
@@ -659,13 +558,9 @@ class albumArtwork(object):
                 ],
             )
         )
-        # dwg.defs.add(self.artworkLogoSymbol(svgCassette))
-        # svgCassette.add(svgCassette.use(self.artworkLogoSymbol(svgCassette), insert=(28,90), size=(9,9)))
-        # svgCassette.add(svgCassette.use(self.artworkLogoSymbol(svgCassette), insert=(41,90), size=(9,9)))
-        # svgCassette.add(self.artworkLogo(svgCassette, 9, 9, 28, 90))
-        # svgCassette.add(self.artworkLogo(svgCassette, 9, 9, 41, 90))
-        # svgCassette.add(self.artworkSelect(svgCassette, 60, 60, 41, 24))
-        # svgCassette.add(self.artworkSelect(svgCassette, 60, 60, 105, 38))
+        s.defs.add(self.artworkDesign())
+        s.add(s.use(href=("#artwork"), transform="translate(10 10) scale(1)"))
+        s.add(s.use(href=("#artwork"), transform="translate(100 20) scale(1)"))
 
         for i, t in enumerate(textwrap.wrap(self.album.trackNamesText, 90)):
             fSize = 2.4
@@ -690,9 +585,9 @@ class albumArtwork(object):
                     rotate90=False,
                 )
             )
-        svgCassette.add(
+        s.add(
             self.artworkTextMultiTrackNames(
-                svgCassette,
+                s,
                 "2.4",
                 105,
                 4,
@@ -702,26 +597,139 @@ class albumArtwork(object):
                 lineSpacing=2.5,
             )
         )
-        # textLines = [
-        # #	size, x, y, anchor, weight, text, id, font, transform,
-        # 	[svgCassette, '5', 101, 6, 'end', 'bold', self.album.artist.name, 'artistNameFront', 'Alte Haas Grotesk', False],
-        # 	[svgCassette, '5', 101, 12, 'end', 'normal', self.album.name, 'albumNameFront', 'Alte Haas Grotesk', False],
-        # 	[svgCassette, '3.5', 34, 2, 'start', 'bold', self.album.artist.name, 'artistNameSpine', 'Alte Haas Grotesk', True],
-        # 	[svgCassette, '2', 32, 89, 'end', 'normal', self.album.catNo, 'catNoSpine', 'Alte Haas Grotesk', True],
-        # 	[svgCassette, '3.5', 29, 2, 'start', 'normal', self.album.name, 'albumNameSpine', 'Alte Haas Grotesk', True],
-        # 	[svgCassette, '3', 51, 95.5, 'start', 'normal', self.album.artist.label.name, 'labelNameFront', 'Alte Haas Grotesk', False],
-        # 	[svgCassette, '2', 0, 101, 'end', 'normal', self.album.seed, 'pixelSeed', 'SeedBinaryPixel', True],
-        # 	[svgCassette, '2', 8, 2, 'start', 'normal', f'All titles written by {" / ".join([p.surname for p in self.album.people])}', 'Flapcredit', 'Alte Haas Grotesk', True],
-        # 	[svgCassette, '2', 2, 2, 'start', 'normal', f'©{self.album.year}  {self.album.artist.label.name} \N{BULLET} {self.album.catNo}', 'FlapCopyright', 'Alte Haas Grotesk', True],
-        # 	[svgCassette, '2', 5, 2, 'start', 'normal', self.album.svgTagline, 'tagline', 'Alte Haas Grotesk', True],
-        # 	]
-        # for t in textLines:
-        # 	svgCassette.add(self.artworkTextOneLine(t[0],t[1],t[2],t[3],t[4],t[5],t[6],t[7],t[8],t[9]))
-        # 	# pass
-        svgCassette.defs.add(self.svgSymbols)
-        svgCassette.add(self.svgSymbols.use(href="#circle"))
-        svgCassette.add(self.svgMarkers(svgCassette, 170, 110, 10, show=False))
-        svgCassette.save()
+        textLines = [
+            # 	size, x, y, anchor, weight, text, id, font, transform,
+            [
+                svgCassette,
+                "5",
+                101,
+                6,
+                "end",
+                "bold",
+                self.album.incarn.artist.name,
+                "artistNameFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+            [
+                svgCassette,
+                "5",
+                101,
+                12,
+                "end",
+                "normal",
+                self.album.name,
+                "albumNameFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+            [
+                svgCassette,
+                "3.5",
+                34,
+                2,
+                "start",
+                "bold",
+                # self.album.artist.name,
+                self.album.incarn.artist.name,
+                "artistNameSpine",
+                "Alte Haas Grotesk",
+                True,
+            ],
+            [
+                svgCassette,
+                "2",
+                32,
+                89,
+                "end",
+                "normal",
+                self.album.catNo,
+                "catNoSpine",
+                "Alte Haas Grotesk",
+                True,
+            ],
+            [
+                svgCassette,
+                "3.5",
+                29,
+                2,
+                "start",
+                "normal",
+                self.album.name,
+                "albumNameSpine",
+                "Alte Haas Grotesk",
+                True,
+            ],
+            [
+                svgCassette,
+                "3",
+                51,
+                95.5,
+                "start",
+                "normal",
+                self.album.incarn.artist.label.name,
+                "labelNameFront",
+                "Alte Haas Grotesk",
+                False,
+            ],
+            [
+                svgCassette,
+                "2",
+                0,
+                101,
+                "end",
+                "normal",
+                self.album.seed,
+                "pixelSeed",
+                "SeedBinaryPixel",
+                True,
+            ],
+            [
+                svgCassette,
+                "2",
+                8,
+                2,
+                "start",
+                "normal",
+                f'All titles written by {" / ".join([p.surname for p in self.album.people])}',
+                "Flapcredit",
+                "Alte Haas Grotesk",
+                True,
+            ],
+            [
+                svgCassette,
+                "2",
+                2,
+                2,
+                "start",
+                "normal",
+                f"©{self.album.year}  {self.album.incarn.artist.label.name} \N{BULLET} {self.album.catNo}",
+                "FlapCopyright",
+                "Alte Haas Grotesk",
+                True,
+            ],
+            [
+                svgCassette,
+                "2",
+                5,
+                2,
+                "start",
+                "normal",
+                self.album.svgTagline,
+                "tagline",
+                "Alte Haas Grotesk",
+                True,
+            ],
+        ]
+        for t in textLines:
+            s.add(
+                self.artworkTextOneLine(
+                    t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9]
+                )
+            )
+        # svgCassette.defs.add(self.svgSymbols)
+        s.add(self.svgMarkers(svgCassette, 170, 110, 10, show=True))
+        s.save()
         return
 
     def artworkCdBooklet(self):
@@ -1038,7 +1046,7 @@ class albumArtwork(object):
         )
         svgPosterA2.defs.add(self.svgSymbolLogo())
         self.svgClipPaths()
-
+        # main background shape
         svgPosterA2.add(
             self.artworkOutline(
                 svgPosterA2,
@@ -1050,30 +1058,10 @@ class albumArtwork(object):
             )
         )
 
-        # artChosenFunctions = choices(self.artTypeFunctions,k=2) # disabled temp
-        artChosenFunctions = [
-            self.artTypeFunctions[2],
-            self.artTypeFunctions[3],
-        ]  # fixed temp
-        svgPosterA2.defs.add(artChosenFunctions[0][1](self))
-        svgPosterA2.defs.add(artChosenFunctions[1][1](self))
-        artChosenId1 = "#" + artChosenFunctions[0][1].__defaults__[0]
-        artChosenId2 = "#" + artChosenFunctions[1][1].__defaults__[0]
-
-        grid = True
-        # if 1 == 1:  # single temp
-        if grid != True:  # single
-            # front art
-            svgPosterA2.add(
-                svgPosterA2.use(
-                    href=(artChosenId1), transform="translate(20 20) scale(1.81)"
-                )
-            )
-        else:  # grid
-            self.artworkGrid(
-                svgObject=svgPosterA2, s1=artChosenId1, s2=artChosenId2, startX=20, startY=20, artDim=380
-            )
-
+        svgPosterA2.defs.add(self.artworkDesign())
+        svgPosterA2.add(
+            svgPosterA2.use(href=("#artwork"), transform="translate(20 20) scale(3.8)")
+        )
         # add outlines for layout
         svgPosterA2.add(
             self.artworkOutline(
@@ -1139,7 +1127,7 @@ class albumArtwork(object):
                 svgPosterA2,
                 "18",
                 400,
-                425,
+                430,
                 "end",
                 "bold",
                 self.album.incarn.artist.name,
@@ -1151,7 +1139,7 @@ class albumArtwork(object):
                 svgPosterA2,
                 "18",
                 400,
-                450,
+                455,
                 "end",
                 "normal",
                 self.album.name,
@@ -1210,37 +1198,38 @@ class albumArtwork(object):
         return
 
     def artworkGrid(
-        self, svgObject, s1, s2, gridDim=randint(5, 8), gridGap=randint(1, 2), startX=0, startY=0, artDim=300,
+        self,
+        svgObject,
+        s1,
+        s2,
+        gridDim=randint(5, 8),
+        gridGap=randint(1, 2),
+        startX=0,
+        startY=0,
+        artDim=300,
     ):
-        gridCellDim = (artDim - ((gridDim - 1) * gridGap)) / gridDim # TODO fix this calc - gaps too big
+        # gridCellDim = (artDim - ((gridDim - 1) * gridGap)) / gridDim # TODO fix this calc - gaps too big
+        gridDim = 8
+        gridCellDim = artDim / gridDim  # TODO fix this calc - gaps too big
+        gridGap = 1
 
         # , transform=f"translate({400 + (column * gridCellDim) + (column * gridGap)} {70 + (row * gridCellDim)+(row * gridGap)}) scale({gridCellDim/(self.artDim)}) ", stroke="white", stroke_width="0.1", fill="none",)
         # svg12in.use(href=(artChosen), transform=f"translate({400 + (column * gridCellDim) + (column * gridGap)} {70 + (row * gridCellDim)+(row * gridGap)}) scale({gridCellDim/(self.artDim)}) ", stroke="white", stroke_width="0.1", fill="none",)
 
-        # s1.add(
-        #     svgObject.use(
-        #         href=(s1),
-        #         stroke="white",
-        #         stroke_width="0.1",
-        #         fill="blue",
-        #     )
-        # )
-        # s2.add(
-        #     svgObject.use(
-        #         href=(s2),
-        #         stroke="white",
-        #         stroke_width="0.1",
-        #         fill="blue",
-        #     )
-        # )
         for row in range(0, gridDim):
             for column in range(0, gridDim):
-                artInsert = svgObject.use(href=(s1 if (random() > 0.5) else s2),)
+                # artInsert = svgObject.use(href=(s1 if (random() > 0.5) else s2),)
+
+                artInsert = svgObject.use(href=(s2))
+
                 artInsert.translate(
-                    startX + (column * gridCellDim) + (column * gridGap),
-                    startY + (row * gridCellDim) + (row * gridGap),
+                    # startX + (column * gridCellDim) + (column * gridGap),
+                    startX + (column * gridCellDim),
+                    # startY + (row * gridCellDim) + (row * gridGap),
+                    startY + (row * gridCellDim),
                 )
                 artInsert.scale(gridCellDim / artDim)
+                # artInsert.scale(artDim / gridCellDim  )
                 svgObject.add(artInsert)
                 # return artInsert
 
@@ -1271,90 +1260,17 @@ class albumArtwork(object):
                 ],
             )
         )
-
-        # TODO add all art styles
-        artIds = [
-            "logo",  # 0
-            "rect",
-            "3triangles",
-            "4quadrants",
-            "circles",
-            "rays",
-            "angle",
-            "sector",
-            "halfcircleempty",  # 8
-            "halfcirclefilled",
-            "diagonal",
-            "circlefilled",
-            "circleempty",
-            "reeds",  # 13
-        ]
-        # artChosen = "#" + artIds[randint(0, (len(artIds)))]
-        artChosen1 = "#" + artIds[randint(0, (len(artIds)) - 1)]
-        artChosen2 = "#" + artIds[6]
-        # if choice(["grid", "single"]) == "grid":
-        # if random() > 1:  # single
-        if 1 == 1:  # single
-            # front art
-            svg12in.add(
-                svg12in.use(href=(artChosen1), transform="translate(145 70) scale(0.7)")
-            )
-            # back art
-            svg12in.add(
-                svg12in.use(href=(artChosen1), transform="translate(400 70) scale(1)")
-            )
-        else:  # grid
-            gridDim = randint(4, 8)
-            gridGap = randint(2, 6)
-            gridCellDim = (self.artDim - ((gridDim - 1) * gridGap)) / gridDim
-            symbolChosen1 = svg12in.g(id="chosen1")
-            svg12in.defs.add(symbolChosen1)
-            symbolChosen1.add(
-                svg12in.use(
-                    href=(artChosen1),
-                    stroke="white",
-                    stroke_width="0.1",
-                    fill="blue",
-                    # transform="rotate(0)",
-                )
-            )
-            symbolChosen2 = svg12in.g(id="chosen2")
-            svg12in.defs.add(symbolChosen2)
-            symbolChosen2.add(
-                svg12in.use(
-                    href=(artChosen2),
-                    stroke="white",
-                    stroke_width="0.1",
-                    fill="red",
-                    # transform="rotate(0)",
-                )
-            )
-
-            for row in range(0, gridDim):
-                for column in range(0, gridDim):
-                    artInsert = svg12in.use(
-                        href=("chosen1" if (random() > 0.5) else "chosen2"),
-                    )
-                    artInsert.translate(
-                        400 + (column * gridCellDim) + (column * gridGap),
-                        70 + (row * gridCellDim) + (row * gridGap),
-                    )
-                    artInsert.scale(gridCellDim / self.artDim)
-                    svg12in.add(artInsert)
-
-                    # , transform=f"translate({400 + (column * gridCellDim) + (column * gridGap)} {70 + (row * gridCellDim)+(row * gridGap)}) scale({gridCellDim/(self.artDim)}) ", stroke="white", stroke_width="0.1", fill="none",)
-                    # svg12in.use(href=(artChosen), transform=f"translate({400 + (column * gridCellDim) + (column * gridGap)} {70 + (row * gridCellDim)+(row * gridGap)}) scale({gridCellDim/(self.artDim)}) ", stroke="white", stroke_width="0.1", fill="none",)
-
-        # region add logos
-        # add logo symbol front
+        s = svg12in
+        s.defs.add(self.artworkDesign())
+        s.add(s.use(href=("#artwork"), transform="translate(145 70) scale(1.3)"))
+        s.add(svg12in.use(href=("#artwork"), transform="translate(400 70) scale(2.1)"))
+        # add logo symbol front & back
         svg12in.add(
             svg12in.use(href=("#logo"), transform="translate(590 290) scale(2)",)
         )
-        # add logo symbol back
         svg12in.add(
             svg12in.use(href=("#logo"), transform="translate(20 270) scale(2)",)
         )
-        # endregion
 
         # region texts
         # Single lines of text
@@ -1371,7 +1287,7 @@ class albumArtwork(object):
                 "NameSpine",
                 "Alte Haas Grotesk",
                 True,
-            ],
+            ],  # NameSpine
             [
                 svg12in,
                 "2",
@@ -1383,7 +1299,7 @@ class albumArtwork(object):
                 "catNoSpine",
                 "Alte Haas Grotesk",
                 True,
-            ],
+            ],  # catNoSpine
             [
                 svg12in,
                 "14",
@@ -1395,7 +1311,7 @@ class albumArtwork(object):
                 "FrontArtist",
                 "Alte Haas Grotesk",
                 False,
-            ],
+            ],  # FrontArtist
             [
                 svg12in,
                 "14",
@@ -1509,6 +1425,7 @@ class albumArtwork(object):
         return
 
 
+# region unused
 # def artwork(
 #     self, artFileName, width="248", height="248", colorFg="black", pixels="50"
 # ):
@@ -1696,3 +1613,105 @@ class albumArtwork(object):
 #     # print(command)
 #     # subprocess.call(command, shell=True)
 #     return artPath
+
+# def svgShapeGrid(
+#     self,
+#     id="shapeGrid",
+#     shapeUsed=0,
+#     gridSize=6,
+#     width=1000,
+#     height=1000,
+#     fractionOfCell=0.7,
+# ):
+#     dwg = svgwrite.Drawing(
+#         f"{id}.svg",
+#         size=(f"{width}mm", f"{height}mm"),
+#         viewBox=(f"0 0 {width} {height}"),
+#         profile="full",
+#     )
+#     seed(self.album.seed)
+#     cellSize = width / gridSize
+#     dwg.add(dwg.rect(insert=(0, 0), size=(width + 20, height + 20), fill="#545454"))
+#     gridShapeSymbol1 = dwg.symbol(id="gridShape1")
+#     gridShapeSymbol2 = dwg.symbol(id="gridShape2")
+#     dwg.defs.add(gridShapeSymbol1)
+#     dwg.defs.add(gridShapeSymbol2)
+#     gridShapeSymbols = [
+#         # dwg.line(start=(-cellSize, (cellSize/2)), end=((cellSize*2),(cellSize/2)), transform=f'rotate({randint(0,180)} {cellSize/2} {cellSize/2})'),
+#         dwg.path(
+#             d=f"M 0 {cellSize*0.2} h {cellSize} M 0 {cellSize*0.4} h {cellSize} M 0 {cellSize*0.6} h {cellSize} M 0 {cellSize*0.8} h {cellSize}",
+#             stroke_width="3",
+#         ),  # 4 stripes
+#         dwg.rect(
+#             insert=(0, 0), size=(cellSize, cellSize), fill="white", stroke_width="1"
+#         ),  # square
+#         dwg.path(
+#             d=f"M 0 0 L {cellSize} 0 0 {cellSize} Z", fill="white", stroke_width="1"
+#         ),  # corner triangle
+#         dwg.path(
+#             d=f"M -2 -2 L {cellSize+2} {cellSize+2}",
+#             stroke="white",
+#             stroke_width="1",
+#             stroke_linecap="butt",
+#         ),  # Slash
+#         dwg.path(
+#             d=f"M 1 0 A {(cellSize-2)/2} {(cellSize-2)/2} 0 0 0 {cellSize-1} 0 ",
+#             fill="none",
+#             stroke_width="1",
+#         ),  # empty semicircle
+#         dwg.path(
+#             d=f"M 1 0 A {(cellSize-2)/2} {(cellSize-2)/2} 0 0 0 {cellSize-1} 0 Z",
+#             fill="white",
+#             stroke_width="1",
+#         ),  # filled semicircle
+#         dwg.path(
+#             d=f"M {cellSize/2} 0 v {cellSize/2} h {cellSize/2}",
+#             fill="none",
+#             stroke_width="1",
+#         ),  # 90 angle
+#         dwg.path(
+#             d=f"M 0 {-(cellSize/2)} A {cellSize/2} {cellSize/2} 0 0 1 0 {cellSize/2}",
+#             fill="none",
+#             stroke_width="1",
+#         ),  # empty quarter circle
+#         dwg.path(
+#             d=f"M 0 {-(cellSize/2)} A {cellSize/2} {cellSize/2} 0 0 1 0 {cellSize/2}",
+#             fill="white",
+#             stroke_width="1",
+#         ),  # filled quarter circle
+#         dwg.circle(
+#             center=((cellSize / 2), (cellSize / 2)),
+#             r=(cellSize * 0.4),
+#             fill="white",
+#         ),  # filled circle
+#         dwg.circle(
+#             center=((cellSize / 2), (cellSize / 2)), r=(cellSize * 0.4), fill="none"
+#         ),  # empty circle
+#     ]
+#     shapeSample = sample(gridShapeSymbols, k=2)
+#     gridShapeSymbol1.add(shapeSample[0])
+#     gridShapeSymbol2.add(shapeSample[1])
+#     # gridShapeSymbol1.add(choice(gridShapeSymbols))
+#     # gridShapeSymbol2.add(choice(gridShapeSymbols))
+#     rotateAmount = randint(0, 3) * 90
+#     for row in range(0, gridSize):
+#         for column in range(0, gridSize):
+#             if random() > 0.5:
+#                 shapeUsed = gridShapeSymbol1
+#             else:
+#                 shapeUsed = gridShapeSymbol2
+#             dwg.add(
+#                 dwg.use(
+#                     shapeUsed,
+#                     insert=((column * cellSize), (row * cellSize)),
+#                     size=(cellSize, cellSize),
+#                     stroke_width="1",
+#                     stroke="white",
+#                     transform=f"rotate({rotateAmount} {(column*cellSize)+(cellSize/2)} {(row*cellSize)+(cellSize/2)})",
+#                 )
+#             )
+#             # dwg.add(dwg.text(f'{row}/{column}', insert=((column*cellSize), (row*cellSize)+4), font_size=3, font_family='Arial'))
+#     dwg.save()
+#     return
+# endregion
+

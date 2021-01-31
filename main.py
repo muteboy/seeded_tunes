@@ -24,8 +24,8 @@ inputSeed = defaultSeed
 
 print("\n" * 20)
 
-stopppp=False
-if stopppp==True:
+stop=False
+if stop==True:
     pass
 else:
     if (len(sys.argv)==1) or (sys.argv[1] != "0"):
@@ -50,7 +50,7 @@ else:
             numArtists=1,
             numIncarnations=1,
             numAlbums=1,
-            numTracks=1,
+            numTracks=5,
             viewLog=False,
         )
 
